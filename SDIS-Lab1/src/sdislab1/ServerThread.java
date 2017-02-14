@@ -30,9 +30,9 @@ public class ServerThread extends Thread {
 	    
 	    String[] splitted = msg.split("#");
 	    
-	    String answer = null;
+	    String answer = "blabla";
 	    
-	    if(splitted[0] == "lookup") {
+	    if(splitted[0].equals("lookup")) {
 	    	if(splitted[1] == plates[1])
 	    		answer = "Plate "+splitted[1]+" exists!";
 	    	else
