@@ -41,6 +41,15 @@ public class ServerThread extends Thread {
 	    	else
 	    		answer = "Plate "+splitted[1]+"NOT_FOUND";
 	    }
+	    if(splitted[0].equals("register")) {
+	    	if(database.containsKey(splitted[1]))
+	    		answer = "-1";
+	    	
+	    	else{
+	    		database.put(splitted[1], splitted[2]);
+	    		answer=database.size()+"";
+	    	}
+	    }
 	    
 	    buf = answer.getBytes();
         
