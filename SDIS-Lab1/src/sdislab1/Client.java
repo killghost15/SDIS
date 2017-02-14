@@ -8,7 +8,7 @@ import java.net.InetAddress;
 public class Client {
     public static void main(String[] args) throws IOException {
 
-        if (args.length >= 4) {
+        if (args.length > 4) {
              System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd>*");
              return;
         }
@@ -17,15 +17,23 @@ public class Client {
 
         byte[] buf = new byte[256];
         InetAddress address = InetAddress.getByName(args[0]);
-        DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 4445);
-        socket.send(packet);
+        
+        DatagramPacket packet = sendPacket(socket,args[3],buf,address);
     
         packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
 
         String received = new String(packet.getData(), 0, packet.getLength());
-        System.out.println("Quote of the Moment: " + received);
+        System.out.println(received);
     
         socket.close();
+    }
+    
+    public static DatagramPacket sendPacket(DatagramSocket socket, String plate, byte[] buf, InetAddress address) throws IOException {
+    	String msg = "lookup#"+plate;
+    	buf = msg.getBytes();
+    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 4445);
+        socket.send(packet);
+		return packet;
     }
 }

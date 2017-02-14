@@ -22,8 +22,22 @@ public class ServerThread extends Thread {
 	    byte[] buf = new byte[256];
 	    DatagramPacket packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
+        
+	    String msg = new String(packet.getData(), 0, packet.getLength());
+	    
+	    System.out.println("Client connected");
+	    System.out.println("Client message: "+msg);
+	    
+	    String[] splitted = msg.split("#");
 	    
 	    String answer = null;
+	    
+	    if(splitted[0] == "lookup") {
+	    	if(splitted[1] == plates[1])
+	    		answer = "Plate "+splitted[1]+" exists!";
+	    	else
+	    		answer = "Plate "+splitted[1]+" not found!";
+	    }
 	    
 	    buf = answer.getBytes();
         
