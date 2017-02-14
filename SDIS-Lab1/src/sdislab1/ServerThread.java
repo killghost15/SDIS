@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Hashtable;
 
 public class ServerThread extends Thread {
 	
 	protected String[] plates = {"Fulano","AA|44|BB"};
-	
+	protected Hashtable<String, String> database = new Hashtable<String,String>();
 	protected DatagramSocket socket = null;
 
 	public ServerThread() throws IOException {
@@ -17,6 +18,8 @@ public class ServerThread extends Thread {
 
 	public ServerThread(String name) throws IOException {
 	    super(name);
+	    database.put("Fulano", "AA|44|BB");
+	    database.put("Tipo2", "AB|33|CC");
 	    socket = new DatagramSocket(4445);
 	    
 	    byte[] buf = new byte[256];
@@ -33,7 +36,7 @@ public class ServerThread extends Thread {
 	    String answer = "blabla";
 	    
 	    if(splitted[0].equals("lookup")) {
-	    	if(splitted[1] == plates[1])
+	    	if(database.contains(splitted[1]))
 	    		answer = "Plate "+splitted[1]+" exists!";
 	    	else
 	    		answer = "Plate "+splitted[1]+" not found!";
