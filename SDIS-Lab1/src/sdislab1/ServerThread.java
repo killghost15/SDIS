@@ -11,15 +11,16 @@ public class ServerThread extends Thread {
 	protected Hashtable<String, String> database = new Hashtable<String,String>();
 	protected DatagramSocket socket = null;
 
-	public ServerThread() throws IOException {
-	    this("Server");
+	public ServerThread(String port) throws IOException {
+	    this("Server",port);
 	}
 
-	public ServerThread(String name) throws IOException {
+	public ServerThread(String name,String portentry) throws IOException {
 	    super(name);
 	    database.put( "AA|44|BB","Fulano");
 	    database.put("AB|33|CC","Tipo2");
-	    socket = new DatagramSocket(4445);
+	    
+	    socket = new DatagramSocket(Integer.parseInt(portentry));
 	    
 	    byte[] buf = new byte[256];
 	    DatagramPacket packet = new DatagramPacket(buf, buf.length);

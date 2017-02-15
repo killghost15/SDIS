@@ -19,9 +19,9 @@ public class Client {
         InetAddress address = InetAddress.getByName(args[0]);
         DatagramPacket packet;
         if("lookup".equals(args[2]))
-        packet = lookUp(socket,args[3],buf,address);
+        packet = lookUp(socket,args[3],buf,address,Integer.parseInt(args[1]));
         if("register".equals(args[2]))
-        packet=register(socket,args[3],args[4],buf,address);
+        packet=register(socket,args[3],args[4],buf,address,Integer.parseInt(args[1]));
         packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
 
@@ -31,17 +31,18 @@ public class Client {
         socket.close();
     }
     
-    public static DatagramPacket lookUp(DatagramSocket socket, String plate, byte[] buf, InetAddress address) throws IOException {
+    public static DatagramPacket lookUp(DatagramSocket socket, String plate, byte[] buf, InetAddress address,int port) throws IOException {
     	String msg = "lookup#"+plate;
     	buf = msg.getBytes();
-    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 4445);
+    	
+    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
         socket.send(packet);
 		return packet;
     }
-    public static DatagramPacket register(DatagramSocket socket, String plate,String owner, byte[] buf, InetAddress address) throws IOException {
+    public static DatagramPacket register(DatagramSocket socket, String plate,String owner, byte[] buf, InetAddress address,int port) throws IOException {
     	String msg = "register#"+plate+"#"+owner;
     	buf = msg.getBytes();
-    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 4445);
+    	DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
         socket.send(packet);
 		return packet;
     }  
