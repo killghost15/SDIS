@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.Hashtable;
 
 public class ServerThread extends Thread {
@@ -22,18 +23,32 @@ public class ServerThread extends Thread {
 	    
 	    socket = new DatagramSocket(Integer.parseInt(portentry));
 	    
+	    socket.setSoTimeout(10000);
 	    byte[] buf = new byte[256];
-	    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+	    DatagramPacket packet;
+	    String[] splitted;
+	    String msg;
+	    String answer;
+	    InetAddress address;
+	    int port;
+        for(int i=0; i<5; i++){        // recieve data until timeout or until more than 5 packages were sent
+            try {
+            	 
+            
+	    
+	    
+	    buf = new byte[256];
+	    packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
         
-	    String msg = new String(packet.getData(), 0, packet.getLength());
+	    msg = new String(packet.getData(), 0, packet.getLength());
 	    
 	    System.out.println("Client connected");
 	    System.out.println("Client message: "+msg);
 	    
-	    String[] splitted = msg.split("#");
+	    splitted = msg.split("#");
 	    
-	    String answer = "blabla";
+	    answer = "blabla";
 	    
 	    if(splitted[0].equals("lookup")) {
 	    	if(database.containsKey(splitted[1]))
@@ -54,11 +69,19 @@ public class ServerThread extends Thread {
 	    
 	    buf = answer.getBytes();
         
-	    InetAddress address = packet.getAddress();
-        int port = packet.getPort();
+	    address = packet.getAddress();
+        port = packet.getPort();
         packet = new DatagramPacket(buf, buf.length, address, port);
         socket.send(packet);
-        
+            }
+        catch (SocketTimeoutException e) {
+            // timeout exception.
+            System.out.println("Timeout reached!!! "+ name+"closed");
+            
+            socket.close();
+            return;
+        }
+    }
 
 	}  
 }

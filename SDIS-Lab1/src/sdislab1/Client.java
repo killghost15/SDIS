@@ -36,7 +36,7 @@ public class Client {
             }
             catch (SocketTimeoutException e) {
                 // timeout exception.
-                System.out.println("Timeout reached!!! " + e);
+                System.out.println("Timeout reached!!! " + "could not reach server");
                 
                 socket.close();
                 return;
