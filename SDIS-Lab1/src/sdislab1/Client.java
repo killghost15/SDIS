@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 public class Client {
     public static void main(String[] args) throws IOException {
@@ -22,8 +23,27 @@ public class Client {
         packet = lookUp(socket,args[3],buf,address,Integer.parseInt(args[1]));
         if("register".equals(args[2]))
         packet=register(socket,args[3],args[4],buf,address,Integer.parseInt(args[1]));
-        packet = new DatagramPacket(buf, buf.length);
-        socket.receive(packet);
+        
+        
+        //set timeout on socket love this API 10 seconds
+        socket.setSoTimeout(10000);
+        
+        while(true){        // recieve data until timeout
+            try {
+            	 packet = new DatagramPacket(buf, buf.length);
+                 socket.receive(packet);
+                 break;
+            }
+            catch (SocketTimeoutException e) {
+                // timeout exception.
+                System.out.println("Timeout reached!!! " + e);
+                
+                socket.close();
+                return;
+            }
+        }
+        
+       
 
         String received = new String(packet.getData(), 0, packet.getLength());
         System.out.println(received);
