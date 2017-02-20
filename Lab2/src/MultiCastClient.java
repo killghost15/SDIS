@@ -41,8 +41,7 @@ public class MultiCastClient {
 			catch (SocketTimeoutException e) {
 				for(int j=0;j<3;j++){
 					// timeout exception.
-					System.out.println("Timeout reached!!! " + "could not reach server");
-
+					System.out.println("multicast: <"+args[0]+"> <" + args[1]+"> : <" + args[2]+"> <"+args[3]+">" );
 					if("lookup".equals(args[2]))
 						packet = lookUp(socket,args[3],buf,address,Integer.parseInt(args[1]));
 					if("register".equals(args[2]))

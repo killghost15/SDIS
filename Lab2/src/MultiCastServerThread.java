@@ -53,6 +53,7 @@ public class MultiCastServerThread extends Thread {
 						answer = "blabla";
 
 						if(splitted[0].equals("lookup")) {
+							System.out.println("lookup "+splitted[1]);
 							if(database.containsKey(splitted[1]))
 								answer = "Plate "+splitted[1]+" exists!\n"
 										+"owner: " + database.get(splitted[1]).toString();
@@ -60,6 +61,7 @@ public class MultiCastServerThread extends Thread {
 								answer = "Plate "+splitted[1]+"NOT_FOUND";
 						}
 						if(splitted[0].equals("register")) {
+							System.out.println("register "+splitted[1]+" "+splitted[2]);
 							if(database.containsKey(splitted[1]))
 								answer = "-1";
 
