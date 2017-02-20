@@ -18,8 +18,10 @@ public class MultiCastClient {
 
 		byte[] buf = new byte[256];
 		InetAddress address = InetAddress.getByName(args[0]);
-		DatagramPacket packet;
+		DatagramPacket packet = null;
 		socket.joinGroup(address);
+		
+		
 
 		if("lookup".equals(args[2]))
 			packet = lookUp(socket,args[3],buf,address,Integer.parseInt(args[1]));

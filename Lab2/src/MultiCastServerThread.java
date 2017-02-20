@@ -23,7 +23,7 @@ public class MultiCastServerThread extends Thread {
 
 		socket = new DatagramSocket(Integer.parseInt(portentry));
 
-		socket.setSoTimeout(10000);
+		socket.setSoTimeout(1000);
 		byte[] buf = new byte[256];
 		DatagramPacket packet;
 		String[] splitted;
@@ -31,56 +31,69 @@ public class MultiCastServerThread extends Thread {
 		String answer;
 		InetAddress address=InetAddress.getByName(mac);
 		int i=0;
-		while(i<5){        // recieve data until timeout or until more than 5 packages were sent
-			try {
+		while (true){
+			//não sei o q ele quer dizer com advertise portanto pus uma mensagem qualquer
+			msg="multicast: <" + mac+ "> <"+mac_port+">"+": <" +">"+ portentry;
+			buf = new byte[256];
+			buf = msg.getBytes();
+			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
+			socket.send(packet);
+			try {	
+						buf = new byte[256];
+						packet = new DatagramPacket(buf, buf.length);
+						socket.receive(packet);
+
+						msg = new String(packet.getData(), 0, packet.getLength());
 
 
+						System.out.println("multicast: <mcast_addr> <mcast_port>: <srvc_addr> <srvc_port> ");
+						System.out.println("multicast: <" + mac+ "> <"+mac_port+">"+": <"+packet.getAddress() +">"+portentry);
+						splitted = msg.split("#");
+
+						answer = "blabla";
+
+						if(splitted[0].equals("lookup")) {
+							if(database.containsKey(splitted[1]))
+								answer = "Plate "+splitted[1]+" exists!\n"
+										+"owner: " + database.get(splitted[1]).toString();
+							else
+								answer = "Plate "+splitted[1]+"NOT_FOUND";
+						}
+						if(splitted[0].equals("register")) {
+							if(database.containsKey(splitted[1]))
+								answer = "-1";
+
+							else{
+								database.put(splitted[1], splitted[2]);
+								answer=database.size()+"";
+							}
+						}
+
+						buf = answer.getBytes();
 
 
-				buf = new byte[256];
-				packet = new DatagramPacket(buf, buf.length);
-				socket.receive(packet);
-
-				msg = new String(packet.getData(), 0, packet.getLength());
-
-				
-				System.out.println("multicast: <mcast_addr> <mcast_port>: <srvc_addr> <srvc_port> ");
-				System.out.println("multicast: <" + mac+ "> <"+mac_port+">"+": <"+packet.getAddress() +">"+portentry);
-				splitted = msg.split("#");
-
-				answer = "blabla";
-
-				if(splitted[0].equals("lookup")) {
-					if(database.containsKey(splitted[1]))
-						answer = "Plate "+splitted[1]+" exists!\n"
-								+"owner: " + database.get(splitted[1]).toString();
-					else
-						answer = "Plate "+splitted[1]+"NOT_FOUND";
-				}
-				if(splitted[0].equals("register")) {
-					if(database.containsKey(splitted[1]))
-						answer = "-1";
-
-					else{
-						database.put(splitted[1], splitted[2]);
-						answer=database.size()+"";
+						packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
+						socket.send(packet);
+						i++;
 					}
+				catch (SocketTimeoutException e) {
+					// timeout exception.
+					System.out.println("Timeout reached!!! "+ name+"closed");
+					
+					/*socket.close();
+					return;*/
 				}
+			if(i>=5)
+				break;
+			
+			
 
-				buf = answer.getBytes();
-
-				
-				packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
-				socket.send(packet);
-			}
-			catch (SocketTimeoutException e) {
-				// timeout exception.
-				System.out.println("Timeout reached!!! "+ name+"closed");
-				i++;
-				socket.close();
-				return;
-			}
 		}
+		socket.close();
+
+
+
+		
 
 	}  
 }
