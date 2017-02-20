@@ -30,7 +30,8 @@ public class MultiCastServerThread extends Thread {
 		String msg;
 		String answer;
 		InetAddress address=InetAddress.getByName(mac);
-		for(int i=0; i<5; i++){        // recieve data until timeout or until more than 5 packages were sent
+		int i=0;
+		while(i<5){        // recieve data until timeout or until more than 5 packages were sent
 			try {
 
 
@@ -42,9 +43,9 @@ public class MultiCastServerThread extends Thread {
 
 				msg = new String(packet.getData(), 0, packet.getLength());
 
-				System.out.println("Client connected");
-				System.out.println("Client message: "+msg);
-
+				
+				System.out.println("multicast: <mcast_addr> <mcast_port>: <srvc_addr> <srvc_port> ");
+				System.out.println("multicast: <" + mac+ "> <"+mac_port+">"+": <"+packet.getAddress() +">"+portentry);
 				splitted = msg.split("#");
 
 				answer = "blabla";
@@ -75,7 +76,7 @@ public class MultiCastServerThread extends Thread {
 			catch (SocketTimeoutException e) {
 				// timeout exception.
 				System.out.println("Timeout reached!!! "+ name+"closed");
-
+				i++;
 				socket.close();
 				return;
 			}
