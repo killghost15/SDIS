@@ -30,7 +30,7 @@ public class MultiCastClient {
 		socket.receive(packet);
 		String received1 = new String(packet.getData(), 0, packet.getLength());
 		String received2;
-		System.out.println(received1);
+		//System.out.println(received1);
 		System.out.println(packet.getPort()+":"+packet.getAddress());
 		
 		
@@ -96,7 +96,7 @@ public class MultiCastClient {
 
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 		socket.send(packet);
-		System.out.println(port);
+		
 		return packet;
 	}
 	public static DatagramPacket register(MulticastSocket socket, String plate,String owner, byte[] buf, InetAddress address,int port) throws IOException {
@@ -104,7 +104,7 @@ public class MultiCastClient {
 		buf = msg.getBytes();
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 		socket.send(packet);
-		System.out.println(port);
+		
 		return packet;
 	}  
 }

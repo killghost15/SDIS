@@ -33,15 +33,16 @@ public class MultiCastServerThread extends Thread {
 		int i=0;
 		while (true){
 			//não sei o q ele quer dizer com advertise portanto pus uma mensagem qualquer
-			msg="multicast:"+ portentry+":"+socket.getInetAddress();
+			msg="multicast:"+ portentry+":"+socket.getInetAddress(); //é inutil  o que se envia o q interessa é mandar o packet
 			buf = new byte[256];
 			buf = msg.getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
 			socket.send(packet);
-			socket.setSoTimeout(5000);
+			System.out.println("Server is announcing its presence");
+			socket.setSoTimeout(1000);
 			try {	
 						buf = new byte[256];
-						System.out.println("chegou");
+						//System.out.println("chegou");
 						packet = new DatagramPacket(buf, buf.length);
 						socket.receive(packet);
 
@@ -49,10 +50,10 @@ public class MultiCastServerThread extends Thread {
 
 
 						System.out.println("multicast: <mcast_addr> <mcast_port>: <srvc_addr> <srvc_port> ");
-						System.out.println("multicast: <" + mac+ "> <"+mac_port+">"+": <"+packet.getAddress() +">"+portentry);
+						System.out.println("multicast: <" + mac+ "> <"+mac_port+">"+": <"+packet.getAddress() +">"+packet.getPort());
 						splitted = msg.split("#");
 
-						answer = "blabla";
+						answer = "teste";
 
 						if(splitted[0].equals("lookup")) {
 							System.out.println("lookup "+splitted[1]);
@@ -76,7 +77,7 @@ public class MultiCastServerThread extends Thread {
 						buf = answer.getBytes();
 
 
-						packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
+						packet = new DatagramPacket(buf, buf.length, address, packet.getPort());
 						socket.send(packet);
 						i++;
 					}
@@ -87,7 +88,7 @@ public class MultiCastServerThread extends Thread {
 					/*socket.close();
 					return;*/
 				}
-			if(i>=5)
+			if(i>=5)//só para terminar pode terminar ao primeiro mas assim permite um teste mais abrangentes
 				break;
 			
 			
