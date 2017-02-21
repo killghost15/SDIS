@@ -13,20 +13,32 @@ public class MultiCastClient {
 			System.out.println("Usage: java Client <mcast_addr> <mcast_port> <oper> <opnd> * ");
 			return;
 		}
-
+//criação da socket definição do numero de routers a mensagem chega
 		MulticastSocket socket = new MulticastSocket();
+		socket.setTimeToLive(1);
 
 		byte[] buf = new byte[256];
 		InetAddress address = InetAddress.getByName(args[0]);
 		DatagramPacket packet = null;
+		packet = new DatagramPacket(buf, buf.length);
+		//junta-se ao grupo com o mac
 		socket.joinGroup(address);
 		
+		//receceção do advertise do server
 		
-
+		String []advertise;
+		socket.receive(packet);
+		String received = new String(packet.getData(), 0, packet.getLength());
+		advertise=received.split("#");
+		
+		
+		
+		//
+		buf = new byte[256];
 		if("lookup".equals(args[2]))
-			packet = lookUp(socket,args[3],buf,address,Integer.parseInt(args[1]));
+			packet = lookUp(socket,args[3],buf,address,Integer.parseInt(advertise[1]));
 		if("register".equals(args[2]))
-			packet=register(socket,args[3],args[4],buf,address,Integer.parseInt(args[1]));
+			packet=register(socket,args[3],args[4],buf,address,Integer.parseInt(advertise[1]));
 
 
 		//set timeout on socket love this API 10 seconds
@@ -61,6 +73,7 @@ public class MultiCastClient {
 					}
 
 				}
+				socket.leaveGroup(address);
 				socket.close();
 				return;
 			}
@@ -68,7 +81,7 @@ public class MultiCastClient {
 
 
 
-		String received = new String(packet.getData(), 0, packet.getLength());
+		received = new String(packet.getData(), 0, packet.getLength());
 		System.out.println(received);
 
 		socket.close();

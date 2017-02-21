@@ -33,7 +33,7 @@ public class MultiCastServerThread extends Thread {
 		int i=0;
 		while (true){
 			//não sei o q ele quer dizer com advertise portanto pus uma mensagem qualquer
-			msg="multicast: <" + mac+ "> <"+mac_port+">"+": <" +">"+ portentry;
+			msg="multicast: "+ portentry;
 			buf = new byte[256];
 			buf = msg.getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
@@ -80,7 +80,7 @@ public class MultiCastServerThread extends Thread {
 					}
 				catch (SocketTimeoutException e) {
 					// timeout exception.
-					System.out.println("Timeout reached!!! "+ name+"closed");
+					//System.out.println("Timeout reached!!! "+ name+"closed");
 					
 					/*socket.close();
 					return;*/
