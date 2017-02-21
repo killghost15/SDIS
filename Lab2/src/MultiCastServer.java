@@ -8,7 +8,7 @@ public class MultiCastServer {
 		if(args.length<1)
 			return ;
 		else
-		new MultiCastServerThread(args[0],args[1],args[2],args[3]).start();
+		new MultiCastServerThread(args[0],args[1],args[2]).start();
 		
 	}
 

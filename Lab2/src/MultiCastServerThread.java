@@ -23,7 +23,7 @@ public class MultiCastServerThread extends Thread {
 
 		socket = new DatagramSocket(Integer.parseInt(portentry));
 
-		socket.setSoTimeout(1000);
+		
 		byte[] buf = new byte[256];
 		DatagramPacket packet;
 		String[] splitted;
@@ -33,13 +33,15 @@ public class MultiCastServerThread extends Thread {
 		int i=0;
 		while (true){
 			//não sei o q ele quer dizer com advertise portanto pus uma mensagem qualquer
-			msg="multicast: "+ portentry;
+			msg="multicast:"+ portentry+":"+socket.getInetAddress();
 			buf = new byte[256];
 			buf = msg.getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
 			socket.send(packet);
+			socket.setSoTimeout(5000);
 			try {	
 						buf = new byte[256];
+						System.out.println("chegou");
 						packet = new DatagramPacket(buf, buf.length);
 						socket.receive(packet);
 

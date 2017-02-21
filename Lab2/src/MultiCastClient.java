@@ -13,7 +13,7 @@ public class MultiCastClient {
 			System.out.println("Usage: java Client <mcast_addr> <mcast_port> <oper> <opnd> * ");
 			return;
 		}
-//criação da socket definição do numero de routers a mensagem chega
+		//criação da socket definição do numero de routers a mensagem chega
 		MulticastSocket socket = new MulticastSocket(Integer.parseInt(args[1]));
 		socket.setTimeToLive(1);
 
@@ -26,32 +26,38 @@ public class MultiCastClient {
 		
 		//receceção do advertise do server
 		
-		String []advertise;
-		socket.receive(packet);
-		String received = new String(packet.getData(), 0, packet.getLength());
-		advertise=received.split(":");
 		
+		socket.receive(packet);
+		String received1 = new String(packet.getData(), 0, packet.getLength());
+		String received2;
+		System.out.println(received1);
+		System.out.println(packet.getPort()+":"+packet.getAddress());
+		
+		
+		// packet.getAddress() packet.getPort() era isto!!!
 		
 		
 		//
 		buf = new byte[256];
 		if("lookup".equals(args[2]))
-			packet = lookUp(socket,args[3],buf,address,Integer.parseInt(advertise[1]));
+			packet = lookUp(socket,args[3],buf,packet.getAddress(),packet.getPort());
 		if("register".equals(args[2]))
-			packet=register(socket,args[3],args[4],buf,address,Integer.parseInt(advertise[1]));
+			packet=register(socket,args[3],args[4],buf,packet.getAddress(),packet.getPort());
 
 
 		//set timeout on socket love this API 10 seconds
-		socket.setSoTimeout(10000);
+		//socket.setSoTimeout(10000);
 
 		while(true){        // recieve data until timeout
 			try {
 				packet = new DatagramPacket(buf, buf.length);
 				socket.receive(packet);
+				received2 = new String(packet.getData(), 0, packet.getLength());
+				if(!received2.equals(received1))
 				break;
 			}
 			catch (SocketTimeoutException e) {
-				for(int j=0;j<3;j++){
+				/*for(int j=0;j<3;j++){
 					// timeout exception.
 					System.out.println("multicast: <"+args[0]+"> <" + args[1]+"> : <" + args[2]+"> <"+args[3]+">" );
 					if("lookup".equals(args[2]))
@@ -66,23 +72,20 @@ public class MultiCastClient {
 							socket.receive(packet);
 							break;
 						}
-						catch (SocketTimeoutException f) {
+						catch (SocketTimeoutException f) {*/
 							break;
 
-						}
+						//}
 					}
 
 				}
 				socket.leaveGroup(address);
 				socket.close();
-				return;
-			}
-		}
+				
 
 
-
-		received = new String(packet.getData(), 0, packet.getLength());
-		System.out.println(received);
+		received2 = new String(packet.getData(), 0, packet.getLength());
+		System.out.println(received2);
 
 		socket.close();
 	}
@@ -93,6 +96,7 @@ public class MultiCastClient {
 
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 		socket.send(packet);
+		System.out.println(port);
 		return packet;
 	}
 	public static DatagramPacket register(MulticastSocket socket, String plate,String owner, byte[] buf, InetAddress address,int port) throws IOException {
@@ -100,6 +104,7 @@ public class MultiCastClient {
 		buf = msg.getBytes();
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 		socket.send(packet);
+		System.out.println(port);
 		return packet;
 	}  
 }
