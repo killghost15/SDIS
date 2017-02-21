@@ -58,7 +58,7 @@ public class MultiCastServerThread extends Thread {
 								answer = "Plate "+splitted[1]+" exists!\n"
 										+"owner: " + database.get(splitted[1]).toString();
 							else
-								answer = "Plate "+splitted[1]+"NOT_FOUND";
+								answer = "Plate "+splitted[1]+" NOT_FOUND";
 						}
 						if(splitted[0].equals("register")) {
 							System.out.println("register "+splitted[1]+" "+splitted[2]);

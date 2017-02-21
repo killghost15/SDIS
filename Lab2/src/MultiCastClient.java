@@ -14,7 +14,7 @@ public class MultiCastClient {
 			return;
 		}
 //criação da socket definição do numero de routers a mensagem chega
-		MulticastSocket socket = new MulticastSocket();
+		MulticastSocket socket = new MulticastSocket(Integer.parseInt(args[1]));
 		socket.setTimeToLive(1);
 
 		byte[] buf = new byte[256];
@@ -29,7 +29,7 @@ public class MultiCastClient {
 		String []advertise;
 		socket.receive(packet);
 		String received = new String(packet.getData(), 0, packet.getLength());
-		advertise=received.split("#");
+		advertise=received.split(":");
 		
 		
 		
