@@ -29,26 +29,26 @@ public class TCPServerThread extends Thread {
 		serversocket = new ServerSocket(Integer.parseInt(portentry));
 
 		serversocket.setSoTimeout(10000);
-		byte[] buf = new byte[256];
+		
 		
 		String[] splitted;
 		String msg;
 		String answer;
-		InetAddress address;
-		int port;
 		for(int i=0; i<5; i++){        // recieve data until timeout or until more than 5 packages were sent
 			try {
 
 
 
 
-				buf = new byte[256];
-				//packet = new DatagramPacket(buf, buf.length);
+				
+				
 				Socket clientSocket = serversocket.accept();
 
 				
-				BufferedReader in = new BufferedReader(
-					        new InputStreamReader(clientSocket.getInputStream()));
+				 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+				    BufferedReader in = new BufferedReader(
+				        new InputStreamReader(clientSocket.getInputStream()));
+				in.readLine();
 				msg=in.toString();
 				System.out.println("Client connected");
 				System.out.println("Client message: "+msg);
@@ -74,10 +74,9 @@ public class TCPServerThread extends Thread {
 					}
 				}
 
-				buf = answer.getBytes();
+				out.println(answer);
 
-				address = serversocket.getInetAddress();
-				port = serversocket.getLocalPort();
+				
 				
 			}
 			catch (SocketTimeoutException e) {
