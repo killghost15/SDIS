@@ -10,46 +10,48 @@ import java.net.SocketTimeoutException;
 public class TCPClient {
 	public static void main(String[] args) throws IOException {
 
-        if (args.length != 4 && args.length !=5) {
-             System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd>*");
-             return;
-        }
+		if (args.length != 4 && args.length !=5) {
+			System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd>*");
+			return;
+		}
 
-       Socket socket = new Socket(args[0],Integer.parseInt(args[1]));
-String msg="";
-String answer="not received";
-       PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-	    BufferedReader in = new BufferedReader(
-	        new InputStreamReader(socket.getInputStream()));
-	    
-        if("lookup".equals(args[2]))
-        msg="lookup#"+args[3];
-        if("register".equals(args[2]))
-        msg="register#"+args[3]+"#"+args[4];
-        out.println(msg);
-        
-        //set timeout on socket love this API 10 seconds
-        socket.setSoTimeout(10000);
-        
-        while(true){        // recieve data until timeout
-            try {
-            	 answer=in.readLine();
-                 break;
-            }
-            catch (SocketTimeoutException e) {
-            	out.close();
-            	in.close();
-                socket.close();
-                return;
-            }
-        }
-        
-       
+		Socket socket = new Socket(args[0],Integer.parseInt(args[1]));
+		String msg="";
+		String answer="not received";
+		PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(socket.getInputStream()));
 
-        
-        System.out.println(answer);
-        out.close();
-    	in.close();
-        socket.close();
-    }
+		if("lookup".equals(args[2]))
+			msg="lookup#"+args[3];
+		if("register".equals(args[2]))
+			msg="register#"+args[3]+"#"+args[4];
+		out.println(msg);
+		System.out.println("Message: "+msg);
+		System.out.println("Waiting for server answer...");
+
+		//set timeout on socket love this API 10 seconds
+		socket.setSoTimeout(10000);
+
+		while(true){        // recieve data until timeout
+			try {
+				answer=in.readLine();
+				break;
+			}
+			catch (SocketTimeoutException e) {
+				out.close();
+				in.close();
+				socket.close();
+				return;
+			}
+		}
+
+
+
+
+		System.out.println("Answer: "+answer);
+		out.close();
+		in.close();
+		socket.close();
+	}
 }
