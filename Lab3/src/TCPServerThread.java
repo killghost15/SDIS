@@ -4,12 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.SocketException;
 import java.util.Hashtable;
 
 public class TCPServerThread extends Thread {
@@ -29,27 +26,18 @@ public class TCPServerThread extends Thread {
 		serversocket = new ServerSocket(Integer.parseInt(portentry));
 
 		serversocket.setSoTimeout(10000);
-		
+		Socket clientSocket = serversocket.accept();
 		
 		String[] splitted;
 		String msg;
 		String answer;
+		PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+	    BufferedReader in = new BufferedReader(
+	        new InputStreamReader(clientSocket.getInputStream()));
 		for(int i=0; i<5; i++){        // recieve data until timeout or until more than 5 packages were sent
 			try {
-
-
-
-
 				
-				
-				Socket clientSocket = serversocket.accept();
-
-				
-				 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				    BufferedReader in = new BufferedReader(
-				        new InputStreamReader(clientSocket.getInputStream()));
-				in.readLine();
-				msg=in.toString();
+				msg=in.readLine();
 				System.out.println("Client connected");
 				System.out.println("Client message: "+msg);
 
@@ -75,14 +63,16 @@ public class TCPServerThread extends Thread {
 				}
 
 				out.println(answer);
-
+				out.close();
+            	in.close();
 				
 				
 			}
-			catch (SocketTimeoutException e) {
+			catch (SocketException e) {
 				// timeout exception.
 				System.out.println("Timeout reached!!! "+ name+"closed");
-
+				out.close();
+            	in.close();
 				serversocket.close();
 				return;
 			}
