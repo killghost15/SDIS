@@ -8,7 +8,7 @@ public class TCPServer {
 		if(args.length<1)
 			return ;
 		else
-		new TCPServerThread(args[0],args[1],args[2]).start();
+		new TCPServerThread(args[0]).start();
 		
 	}
 

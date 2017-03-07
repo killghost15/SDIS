@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Hashtable;
 
 public class TCPServerThread extends Thread {
@@ -14,11 +14,11 @@ public class TCPServerThread extends Thread {
 	protected Hashtable<String, String> database = new Hashtable<String,String>();
 	protected ServerSocket serversocket = null;
 
-	public TCPServerThread(String port,String mac,String mac_port) throws IOException, InterruptedException {
-		this("Server",port,mac,mac_port);
+	public TCPServerThread(String port) throws IOException, InterruptedException {
+		this("Server",port);
 	}
 
-	public TCPServerThread(String name,String portentry,String mac,String mac_port) throws IOException, InterruptedException {
+	public TCPServerThread(String name,String portentry) throws IOException, InterruptedException {
 		super(name);
 		database.put( "AA|44|BB","Fulano");
 		database.put("AB|33|CC","Tipo2");
@@ -34,7 +34,7 @@ public class TCPServerThread extends Thread {
 		PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 	    BufferedReader in = new BufferedReader(
 	        new InputStreamReader(clientSocket.getInputStream()));
-		for(int i=0; i<5; i++){        // recieve data until timeout or until more than 5 packages were sent
+
 			try {
 				
 				msg=in.readLine();
@@ -68,7 +68,7 @@ public class TCPServerThread extends Thread {
 				
 				
 			}
-			catch (SocketException e) {
+			catch (SocketTimeoutException e) {
 				// timeout exception.
 				System.out.println("Timeout reached!!! "+ name+"closed");
 				out.close();
@@ -76,11 +76,6 @@ public class TCPServerThread extends Thread {
 				serversocket.close();
 				return;
 			}
-		}
-
-
-
-		
 
 	}  
 }

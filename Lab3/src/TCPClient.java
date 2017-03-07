@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 public class TCPClient {
 	public static void main(String[] args) throws IOException {
@@ -36,7 +36,7 @@ String answer="not received";
             	 answer=in.readLine();
                  break;
             }
-            catch (SocketException e) {
+            catch (SocketTimeoutException e) {
             	out.close();
             	in.close();
                 socket.close();
