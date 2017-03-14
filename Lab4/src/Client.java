@@ -17,11 +17,12 @@ public class Client {
         	Registry registry = LocateRegistry.getRegistry(args[0]);
             RemoteInterface stub=(RemoteInterface)registry.lookup(args[1]);
             
-        	if(args[2]=="register")
+        	if(args[2].equals("register"))
             response=stub.register(args[3], args[4]);
             
-            if(args[2]=="lookup")
+            if(args[2].equals("lookup")){
             	 response=stub.lookup(args[3]);
+            	 }
             
             System.out.println("response: " + response);
         } catch (Exception e) {

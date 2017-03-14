@@ -4,8 +4,9 @@ import java.util.Hashtable;
 public class RemoteApplication implements RemoteInterface {
 	protected Hashtable<String, String> database = new Hashtable<String,String>();
 	public  RemoteApplication() {
-	database.put( "AA|44|BB","Fulano");
-	database.put("AB|33|CC","Tipo2");}
+	database.put("AA|44|BB","Fulano");
+	database.put("AB|33|CC","Tipo2");
+	}
 	@Override
 	public String register(String plate,String owner)  {
 		String answer;
@@ -24,7 +25,8 @@ public class RemoteApplication implements RemoteInterface {
 	@Override
 	public String lookup(String plate) {
 		String answer;
-		if(database.contains(plate))
+		
+		if(database.containsKey(plate))
 			answer=plate+":"+database.get(plate)+" Found";
 		else{
 			answer="Plate not found";
