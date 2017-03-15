@@ -4,14 +4,16 @@ public class Peer {
 	public Peer(int id){
 		this.id=id;
 	}
-	public void Backup(){
-		
-	}
-	public void Delete(){
-		
-	}
-	public void Restore(){
-		
-	}
+	
 
+
+public void Backup(){
+	
+}
+public void Delete(){
+	
+}
+public void Restore(){
+	
+}
 }
