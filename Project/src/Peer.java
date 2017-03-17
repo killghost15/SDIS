@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -8,9 +12,17 @@ public class Peer {
 		this.id=id;
 		
 	}
-	public static void main(String[] args){
+	public static void main(String[] args) throws NumberFormatException, IOException{
 		//Estabilish connection with Mac group
-		
+		MulticastSocket socket = new MulticastSocket(Integer.parseInt(args[1]));
+		socket.setTimeToLive(1);
+
+		byte[] buf = new byte[256];
+		InetAddress address = InetAddress.getByName(args[0]);
+		DatagramPacket packet = null;
+		packet = new DatagramPacket(buf, buf.length);
+		//junta-se ao grupo com o mac
+		socket.joinGroup(address);
 		
 		//Treat the message received
 		

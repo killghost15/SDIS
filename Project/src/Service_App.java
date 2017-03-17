@@ -16,7 +16,11 @@ import java.rmi.server.UnicastRemoteObject;
 
 
 public class Service_App {
-
+	//estou um bocado confuso com as mensagens n percebi se é assim e depois junto numa string ou se pode ser tudo String 
+	private static char [] versionId={'1','.','0'};
+	private static char [] CR={'0','x','D'};
+	private static char[] LF={'0','x','A'};
+	private static char [] PUTCHANK={'P','U','T','C','H','A','N','K'};
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
 		if(args.length==0)
 			return;
@@ -24,19 +28,28 @@ public class Service_App {
 		RemoteApplication app=new RemoteApplication();
 		RemoteInterface stub=null;
 		Registry registry=null;
-		DatagramSocket socket = new DatagramSocket(Integer.parseInt(portentry));
+		DatagramSocket socket = new DatagramSocket(Integer.parseInt(args[0]));
 		
 
 		byte[] buf = new byte[256];
+		
 		DatagramPacket packet;
-		String[] splitted;
-		String msg;
+		
+		String msgHeader;
+		String msgBody;
 		String answer;
 		InetAddress address=InetAddress.getByName(mac);
 		
 		
-		if(args[0].equals("BACKUP")){
+		if(args[0].equals("BACKUP") &&args.length==){
+			
 			//envio da mensagem para o grupo multicast
+			
+			msgHeader=PUTCHANK.toString()+" "+versionId.toString()+" "+senderId+" "+FileId+" "+ChunkNo+" "+args[4] +" "+CR.toString()+" "+LF.toString();
+			buf = new byte[256];
+			buf = msgHeader.getBytes();
+			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
+			socket.send(packet);
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 

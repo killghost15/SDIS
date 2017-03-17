@@ -3,8 +3,10 @@ import java.util.Hashtable;
 
 
 public class RemoteApplication implements RemoteInterface{
-	protected Hashtable<String, String> database = new Hashtable<String,String>();
-
+	protected String [] SenderIds;
+	public RemoteApplication(){
+		
+	}
 	@Override
 	public String BackupProtocol() throws RemoteException {
 		// TODO Auto-generated method stub
