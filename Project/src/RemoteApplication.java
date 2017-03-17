@@ -1,8 +1,9 @@
 import java.rmi.RemoteException;
+import java.util.Hashtable;
 
 
 public class RemoteApplication implements RemoteInterface{
-
+	protected Hashtable<String, String> database = new Hashtable<String,String>();
 
 	@Override
 	public String BackupProtocol() throws RemoteException {
