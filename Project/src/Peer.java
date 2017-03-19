@@ -26,7 +26,8 @@ public class Peer {
 		
 		//Treat the message received
 		
-		
+		socket.receive(packet);
+		String received1 = new String(packet.getData(), 0, packet.getLength());
 		//Use RMI application for subprotocol function
 		
 		try {

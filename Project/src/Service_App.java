@@ -21,6 +21,7 @@ public class Service_App {
 	private static char [] CR={'0','x','D'};
 	private static char[] LF={'0','x','A'};
 	private static char [] PUTCHANK={'P','U','T','C','H','A','N','K'};
+	private static String mac="224.0.0.1";
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
 		if(args.length==0)
 			return;
@@ -28,7 +29,7 @@ public class Service_App {
 		RemoteApplication app=new RemoteApplication();
 		RemoteInterface stub=null;
 		Registry registry=null;
-		DatagramSocket socket = new DatagramSocket(Integer.parseInt(args[0]));
+		DatagramSocket socket = new DatagramSocket();
 		
 
 		byte[] buf = new byte[256];
@@ -41,14 +42,14 @@ public class Service_App {
 		InetAddress address=InetAddress.getByName(mac);
 		
 		
-		if(args[0].equals("BACKUP") &&args.length==){
+		if(args[0].equals("BACKUP") && args.length==4){
 			
 			//envio da mensagem para o grupo multicast
 			
 			msgHeader=PUTCHANK.toString()+" "+versionId.toString()+" "+senderId+" "+FileId+" "+ChunkNo+" "+args[4] +" "+CR.toString()+" "+LF.toString();
 			buf = new byte[256];
 			buf = msgHeader.getBytes();
-			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(mac_port));
+			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
 			socket.send(packet);
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
@@ -60,7 +61,7 @@ public class Service_App {
 			 }	
 		
 			//BACKUP
-		if(args[0].equals("RESTORE")){
+		if(args[0].equals("RESTORE") && args.length==4){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
