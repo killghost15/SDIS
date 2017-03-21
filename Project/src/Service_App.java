@@ -1,21 +1,14 @@
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.rmi.AlreadyBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 
 public class Service_App {
@@ -49,16 +42,23 @@ public class Service_App {
 		String msgBody;
 		String answer;
 		InetAddress address=InetAddress.getByName(mac);
-		String filename;
+	
 		
 		
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
 			MessageDigest md =MessageDigest.getInstance("SHA-256");
 			md.update(args[2].getBytes());
 			byte byteData[]=md.digest();
+			
+			//convert to hex
+			StringBuffer filename = new StringBuffer();
+	        for (int i = 0; i < byteData.length; i++) {
+	         filename.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+	        }
+			
 			//envio da mensagem para o grupo multicast
 			//filename=args[2]
-			msgHeader=PUTCHANK.toString()+" "+versionId.toString()+" "+senderId+" "+" "/*args[4]*/ +" "+CR.toString()+" "+LF.toString();
+			msgHeader="PUTCHANK".getBytes()+" "+Arrays.toString(versionId)+" "+senderId+" "+ filename.toString() +" "+CR.toString()+" "+LF.toString();
 			buf = new byte[256];
 			buf = msgHeader.getBytes();
 			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
