@@ -10,7 +10,7 @@ public class Peer {
 	public int id;
 	public Peer(int id){
 		this.id=id;
-		
+
 	}
 	public static void main(String[] args) throws NumberFormatException, IOException{
 		//Estabilish connection with Mac group
@@ -23,9 +23,9 @@ public class Peer {
 		packet = new DatagramPacket(buf, buf.length);
 		//junta-se ao grupo com o mac
 		socket.joinGroup(address);
-		
+
 		//Treat the message received
-			
+
 		socket.receive(packet);
 		String received1 = new String(packet.getData(), 0, packet.getLength());
 		System.out.println(received1);
@@ -38,27 +38,27 @@ public class Peer {
             /*
         	if(args[2].equals("register"))
             response=stub.register(args[3], args[4]);
-            
+
             if(args[2].equals("lookup")){
             	 response=stub.lookup(args[3]);
             	 }
-            
+
             System.out.println("response: " + response);
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }*/
 	}
-	
 
 
-public void Backup(){
-	
-}
-public void Delete(){
-	
-}
-public void Restore(){
-	
-}
+
+	public void Backup(){
+
+	}
+	public void Delete(){
+
+	}
+	public void Restore(){
+
+	}
 }

@@ -26,36 +26,36 @@ public class Service_App {
 			System.out.println("java Service_App <port><BACKUP><filename><replicationDeg>");
 			System.out.println("java Service_App <port><RESTORE><filename>");
 			return;
-			}
+		}
 		//inicialização das variaveis 
 		RemoteApplication app=new RemoteApplication();
 		RemoteInterface stub=null;
 		Registry registry=null;
 		DatagramSocket socket = new DatagramSocket();
-		
+
 
 		byte[] buf = new byte[256];
-		
+
 		DatagramPacket packet;
-		
+
 		String msgHeader;
 		String msgBody;
 		String answer;
 		InetAddress address=InetAddress.getByName(mac);
-	
-		
-		
+
+
+
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
 			MessageDigest md =MessageDigest.getInstance("SHA-256");
 			md.update(args[2].getBytes());
 			byte byteData[]=md.digest();
-			
+
 			//convert to hex
 			StringBuffer filename = new StringBuffer();
-	        for (int i = 0; i < byteData.length; i++) {
-	         filename.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-	        }
-			
+			for (int i = 0; i < byteData.length; i++) {
+				filename.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+			}
+
 			//envio da mensagem para o grupo multicast
 			//filename=args[2]
 			msgHeader="PUTCHANK".getBytes()+" "+Arrays.toString(versionId)+" "+senderId+" "+ filename.toString() +" "+CR.toString()+" "+LF.toString();
@@ -66,49 +66,49 @@ public class Service_App {
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
-			
-			 stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			 registry= LocateRegistry.getRegistry();
-			 registry.bind("Service", stub);
-			 }	
-		
-			//BACKUP
+
+			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+			registry= LocateRegistry.getRegistry();
+			registry.bind("Service", stub);
+		}	
+
+		//BACKUP
 		if(args[0].equals("RESTORE") && args.length==4){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
-			
-			 stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			 registry= LocateRegistry.getRegistry();
-			 registry.bind("Service", stub);
-			 }
-				//RESTORE 
+
+			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+			registry= LocateRegistry.getRegistry();
+			registry.bind("Service", stub);
+		}
+		//RESTORE 
 		if(args[0].equals("DELETE")){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
-			
-			 stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			 registry= LocateRegistry.getRegistry();
-			 registry.bind("Service", stub);
-			 }
-			//DELETE
+
+			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+			registry= LocateRegistry.getRegistry();
+			registry.bind("Service", stub);
+		}
+		//DELETE
 		if(args[0].equals("STATE")){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
-			
-			 stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			 registry= LocateRegistry.getRegistry();
-			 registry.bind("Service", stub);
-			 }
-			//Space allocation management
-		
+
+			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+			registry= LocateRegistry.getRegistry();
+			registry.bind("Service", stub);
+		}
+		//Space allocation management
+
 
 	}
-	
+
 
 }
