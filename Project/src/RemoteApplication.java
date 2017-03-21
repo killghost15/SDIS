@@ -8,25 +8,25 @@ public class RemoteApplication implements RemoteInterface{
 		
 	}
 	@Override
-	public String BackupProtocol() throws RemoteException {
+	public String BackupProtocol()  {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String RestoreProtocol() throws RemoteException {
+	public String RestoreProtocol()  {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String DeleteProtocol() throws RemoteException {
+	public String DeleteProtocol()  {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String ReclaimProtocol() throws RemoteException {
+	public String ReclaimProtocol()  {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -15,7 +15,7 @@ public class Peer {
 	public static void main(String[] args) throws NumberFormatException, IOException{
 		//Estabilish connection with Mac group
 		MulticastSocket socket = new MulticastSocket(Integer.parseInt(args[1]));
-		socket.setTimeToLive(1);
+		//socket.setTimeToLive(1);
 
 		byte[] buf = new byte[256];
 		InetAddress address = InetAddress.getByName(args[0]);
@@ -25,11 +25,12 @@ public class Peer {
 		socket.joinGroup(address);
 		
 		//Treat the message received
-		
+			
 		socket.receive(packet);
 		String received1 = new String(packet.getData(), 0, packet.getLength());
+		System.out.println(received1);
 		//Use RMI application for subprotocol function
-		
+		/*
 		try {
         	String response="";
         	Registry registry = LocateRegistry.getRegistry(args[0]);
@@ -41,12 +42,12 @@ public class Peer {
             if(args[2].equals("lookup")){
             	 response=stub.lookup(args[3]);
             	 }
-            */
+            
             System.out.println("response: " + response);
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
-        }
+        }*/
 	}
 	
 
