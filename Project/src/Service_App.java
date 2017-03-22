@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -38,18 +41,21 @@ public class Service_App {
 
 		DatagramPacket packet;
 
-		String msgHeader;
-		String msgBody;
-		String answer;
+		String msgHeader = null;
+		String msgBody=null;
+		String answer=null;
 		InetAddress address=InetAddress.getByName(mac);
-
-
+		String msg=null;
+		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+		registry= LocateRegistry.getRegistry();
+		registry.bind("SDIS", stub);
 
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
+			int repDegree=Integer.parseInt(args[3]);
 			MessageDigest md =MessageDigest.getInstance("SHA-256");
 			md.update(args[2].getBytes());
 			byte byteData[]=md.digest();
-
+			int answerCount=0;
 			//convert to hex
 			StringBuffer filename = new StringBuffer();
 			for (int i = 0; i < byteData.length; i++) {
@@ -58,18 +64,79 @@ public class Service_App {
 
 			//envio da mensagem para o grupo multicast
 			//filename=args[2]
-			msgHeader="PUTCHANK".getBytes()+" "+Arrays.toString(versionId)+" "+senderId+" "+ filename.toString() +" "+CR.toString()+" "+LF.toString();
-			buf = new byte[256];
-			buf = msgHeader.getBytes();
-			packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
-			socket.send(packet);
+			
+			
+			File inputFile = new File(args[2]);
+
+			FileInputStream inputStream;
+
+			int fileSize = (int) inputFile.length();
+
+			int nChunks = 0, read = 0, readLength = 64;
+
+			byte[] byteChunkPart;
+
+			try {
+
+				inputStream = new FileInputStream(inputFile);
+
+				while (fileSize > 0) {
+
+					if (fileSize <=64 ) {
+
+						readLength = fileSize;
+
+					}
+					
+					
+					buf = new byte[256];
+					
+					byteChunkPart = new byte[readLength];
+
+					read = inputStream.read(byteChunkPart, 0, readLength);
+
+					fileSize -= read;
+
+					assert (read == byteChunkPart.length);
+
+					nChunks++;
+
+					msgHeader="PUTCHANK".getBytes()+" "+Arrays.toString(versionId)+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+CR.toString()+LF.toString();
+
+					msgBody=byteChunkPart.toString();
+					msg=msgHeader+msgBody;
+
+					buf = msg.getBytes();
+					packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
+					socket.send(packet);
+					
+					//Espera pelas respostas dos peers 
+					while(answerCount<repDegree){
+						
+					packet = new DatagramPacket(buf, buf.length);
+					socket.receive(packet);
+					answer = new String(packet.getData(), 0, packet.getLength());
+					answerCount++;
+					}
+					byteChunkPart = null;
+					answerCount=0;
+
+				}
+				inputStream.close();
+
+			} catch (IOException exception) {
+
+				exception.printStackTrace();
+
+			}
+			
+			
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
 
-			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			registry= LocateRegistry.getRegistry();
-			registry.bind("Service", stub);
+			
+			
 		}	
 
 		//BACKUP
