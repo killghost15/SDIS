@@ -48,7 +48,9 @@ public class Service_App {
 		InetAddress address=InetAddress.getByName(mac);
 		String msg=null;
 
-
+		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+		registry= LocateRegistry.getRegistry();
+		
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
 			int repDegree=Integer.parseInt(args[3]);
 			MessageDigest md =MessageDigest.getInstance("SHA-256");
@@ -108,10 +110,7 @@ public class Service_App {
 					buf = msg.getBytes();
 					packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
 					socket.send(packet);
-					
-					stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-					registry= LocateRegistry.getRegistry();
-					registry.bind("SDIS", stub);
+				
 					//Espera pelas respostas dos peers 
 					while(answerCount<repDegree){
 						
@@ -119,11 +118,13 @@ public class Service_App {
 						try{
 						packet = new DatagramPacket(buf, buf.length);
 						socket.receive(packet);
+						registry.bind("SDIS", stub);
 						answer = new String(packet.getData(), 0, packet.getLength());
 						answerCount++;
 						}
 						catch (SocketTimeoutException e) {
-							
+							System.out.println("still missing "+(repDegree-answerCount)+" answers");
+							System.out.println("re-sending");
 							socket.send(packet);
 							
 						}

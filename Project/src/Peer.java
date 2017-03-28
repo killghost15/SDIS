@@ -32,43 +32,24 @@ public class Peer {
 
 		socket.receive(packet);
 		
-		String received1 = new String(packet.getData(), 0, packet.getLength());
-		System.out.println(received1);
+		String request = new String(packet.getData(), 0, packet.getLength());
+		System.out.println(request);
+		String splitted[];
+		splitted=request.split(" ");
+		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
+		if(splitted[0].equals("PUTCHUNK")){
+			Registry registry = LocateRegistry.getRegistry(packet.getAddress().getHostName());
+	        RemoteInterface stub=(RemoteInterface)registry.lookup("SDIS");
+	        //content será o body ainda n sei como o extrair
+	        stub.StoreBackupProtocol(splitted[3], splitted[4], content)
+			
+		}
 		
-		Registry registry = LocateRegistry.getRegistry(packet.getAddress().getHostName());
-        RemoteInterface stub=(RemoteInterface)registry.lookup("Service");
 		
 		
 		//Use RMI application for subprotocol function
-		/*
-		try {
-        	String response="";
-        	Registry registry = LocateRegistry.getRegistry(args[0]);
-            RemoteInterface stub=(RemoteInterface)registry.lookup(args[1]);
-            /*
-        	if(args[2].equals("register"))
-            response=stub.register(args[3], args[4]);
-
-            if(args[2].equals("lookup")){
-            	 response=stub.lookup(args[3]);
-            	 }
-
-            System.out.println("response: " + response);
-        } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
-        }*/
+		
 	}
 
 
-
-	public void Backup(){
-
-	}
-	public void Delete(){
-
-	}
-	public void Restore(){
-
-	}
 }
