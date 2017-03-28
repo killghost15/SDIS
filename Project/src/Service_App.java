@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -46,9 +47,7 @@ public class Service_App {
 		String answer=null;
 		InetAddress address=InetAddress.getByName(mac);
 		String msg=null;
-		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-		registry= LocateRegistry.getRegistry();
-		registry.bind("SDIS", stub);
+
 
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
 			int repDegree=Integer.parseInt(args[3]);
@@ -64,8 +63,8 @@ public class Service_App {
 
 			//envio da mensagem para o grupo multicast
 			//filename=args[2]
-			
-			
+
+
 			File inputFile = new File(args[2]);
 
 			FileInputStream inputStream;
@@ -87,10 +86,10 @@ public class Service_App {
 						readLength = fileSize;
 
 					}
-					
-					
+
+
 					buf = new byte[256];
-					
+
 					byteChunkPart = new byte[readLength];
 
 					read = inputStream.read(byteChunkPart, 0, readLength);
@@ -110,13 +109,25 @@ public class Service_App {
 					packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
 					socket.send(packet);
 					
+					stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+					registry= LocateRegistry.getRegistry();
+					registry.bind("SDIS", stub);
 					//Espera pelas respostas dos peers 
 					while(answerCount<repDegree){
 						
-					packet = new DatagramPacket(buf, buf.length);
-					socket.receive(packet);
-					answer = new String(packet.getData(), 0, packet.getLength());
-					answerCount++;
+						socket.setSoTimeout(5000);
+						try{
+						packet = new DatagramPacket(buf, buf.length);
+						socket.receive(packet);
+						answer = new String(packet.getData(), 0, packet.getLength());
+						answerCount++;
+						}
+						catch (SocketTimeoutException e) {
+							
+							socket.send(packet);
+							
+						}
+
 					}
 					byteChunkPart = null;
 					answerCount=0;
@@ -129,14 +140,14 @@ public class Service_App {
 				exception.printStackTrace();
 
 			}
-			
-			
+
+
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
 
-			
-			
+
+
 		}	
 
 		//BACKUP
