@@ -10,6 +10,8 @@ import java.rmi.registry.Registry;
 public class Peer {
 	
 	private static String mac="224.0.0.3";
+	private static char [] CR={'0','D'};
+	private static char[] LF={'0','A'};
 	public Peer(){
 		
 
@@ -34,14 +36,15 @@ public class Peer {
 		
 		String request = new String(packet.getData(), 0, packet.getLength());
 		System.out.println(request);
-		String splitted[];
-		splitted=request.split(" ");
+		String msghead=request.split(CR.toString()+LF.toString())[0];
+		String msgbody=request.split(CR.toString()+LF.toString())[1];
+		String splittedHead[]=msghead.split(" ");
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
-		if(splitted[0].equals("PUTCHUNK")){
+		if(splittedHead[0].equals("PUTCHUNK")){
 			Registry registry = LocateRegistry.getRegistry(packet.getAddress().getHostName());
 	        RemoteInterface stub=(RemoteInterface)registry.lookup("SDIS");
 	        //content será o body ainda n sei como o extrair
-	        stub.StoreBackupProtocol(splitted[3], splitted[4], content)
+	        stub.StoreBackupProtocol(splittedHead[3], Integer.parseInt(splittedHead[4]), msgbody.getBytes());
 			
 		}
 		
