@@ -41,9 +41,27 @@ public class RemoteApplication implements RemoteInterface{
 	}
 
 	@Override
-	public String RestoreProtocol()  {
-		// TODO Auto-generated method stub
-		return null;
+	public String RestoreProtocol(String filename, int Chunknr) throws IOException{
+		
+		
+		int read;
+		File file = new File(filename);
+		FileOutputStream out = new FileOutputStream(file);
+		
+		for(int i=1; i<=Chunknr; i++) {
+			File chunk = new File(filename+".part"+i);
+			FileInputStream in = new FileInputStream(chunk);
+			byte[] bytes = new byte[(int) chunk.length()];
+			read = in.read(bytes,0,(int) chunk.length());
+			
+			out.write(bytes);
+			out.flush();
+			in.close();
+		}
+		out.close();
+		
+		
+		return "File restored with sucess";
 	}
 
 	@Override
