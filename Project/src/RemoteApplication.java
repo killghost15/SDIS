@@ -4,13 +4,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
 public class RemoteApplication implements RemoteInterface{
 	protected String [] SenderIds;
 	String metadatafile=".metadata";
+	int readLength=64*1000;
 	public RemoteApplication(){
 		try {
 			FileOutputStream file=new FileOutputStream(".metadata", true);
@@ -79,8 +79,9 @@ public class RemoteApplication implements RemoteInterface{
 		}
 		return "File "+filename+" chunks deleted with success.";
 	}
-	
-
+	public int getreadLength(){
+		return readLength;
+	}
 	@Override
 	public String ReclaimProtocol()  {
 		// TODO Auto-generated method stub

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.charset.StandardCharsets;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -10,9 +11,12 @@ import java.rmi.registry.Registry;
 public class Peer {
 	
 	private static String mac="224.0.0.3";
-	private static char [] CR={'0','D'};
-	private static char[] LF={'0','A'};
-	public Peer(){
+	/* #TODO aldrabei para string pk perdi a paciencia
+	private static byte[] CR ={'0','x','D'};
+	private static byte[] LF={'0','x','A'};
+	*/
+	private static String CR="0xD";
+	private static String LF="0xA";	public Peer(){
 		
 
 	}
@@ -22,7 +26,8 @@ public class Peer {
 		//socket.setTimeToLive(1);
 		//host_name
         
-        
+        String header=null;
+        String body=null;
 		byte[] buf = new byte[256];
 		InetAddress address = InetAddress.getByName(mac);
 		DatagramPacket packet = null;
@@ -33,12 +38,20 @@ public class Peer {
 		//Treat the message received
 
 		socket.receive(packet);
-		
 		String request = new String(packet.getData(), 0, packet.getLength());
 		System.out.println(request);
-		String msghead=request.split(CR.toString()+LF.toString())[0];
-		String msgbody=request.split(CR.toString()+LF.toString())[1];
-		String splittedHead[]=msghead.split(" ");
+		/*System.out.println(CR+LF);
+		byte b[]={0xD,0xA};
+		System.out.println(new String(b.toString()));
+		System.out.println(new String(b).getBytes());
+		*/
+		//Regex this way you can put as much spaces as you want it will still divide it the same
+		String msghead=request.split(" +"+CR+LF+" +")[0];
+		String msgbody=request.split(" +"+CR+LF+" +")[1];
+		System.out.println(msghead);
+		System.out.println(msgbody);
+		System.out.println(msgbody.getBytes());
+		/*
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 		if(splittedHead[0].equals("PUTCHUNK")){
 			Registry registry = LocateRegistry.getRegistry(packet.getAddress().getHostName());
@@ -48,7 +61,7 @@ public class Peer {
 			
 		}
 		
-		
+		*/
 		
 		//Use RMI application for subprotocol function
 		

@@ -1,0 +1,183 @@
+CREATE IF NOT EXISTS TABLE User (
+	idUser SERIAL NOT NULL,
+	name text NOT NULL,
+	password text NOT NULL CHECK char_length(password)>5,
+	email text UNIQUE NOT NULL,
+	birthDate DATE NOT NULL,
+	address text NOT NULL,
+	nif text UNIQUE,
+	active BOOLEAN,
+	admin BOOLEAN,
+	phonenr INTEGER,
+ 
+	PRIMARY KEY(idUser)
+);
+
+CREATE TABLE Complaint (
+	idComplaint SERIAL NOT NULL,
+	createDate DATE NOT NULL,
+	title text NOT NULL,
+	description text NOT NULL,
+	idUser INTEGER NOT NULL,
+	idProduct INTEGER NOT NULL,
+	idPurchase INTEGER NOT NULL,
+	CONSTRAINT fk_User FOREIGN KEY(idUser) REFERENCES User(idUser),
+	CONSTRAINT fk_PurchaseProduct FOREIGN KEY(idProduct,idPurchase) REFERENCES ProductPurchase(idProduct,idPurchase),
+ 
+	PRIMARY KEY(idComplaints)
+);
+
+
+
+
+
+CREATE TABLE WishList (
+	idUser INTEGER NOT NULL REFERENCES User(idUser),
+	idProduct INTEGER NOT NULL REFERENCES Product(idProduct),
+	url text NOT NULL,
+ 
+	CONSTRAINT pk_Wishlist PRIMARY KEY(idUser,idProduct)
+);
+
+
+
+
+CREATE TABLE ShoppingCart (
+	idUser INTEGER NOT NULL REFERENCES User(idUser),
+	idProduct INTEGER NOT NULL REFERENCES Product(idProduct),
+	quantity INTEGER NOT NULL CHECK (quantity > ),
+ 
+	CONSTRAINT pk_ShoppingCart PRIMARY KEY(idUser,idProduct)
+);
+
+
+
+
+
+
+
+CREATE TABLE Product (
+	idProduct SERIAL NOT NULL,
+	name text UNIQUE NOT NULL,
+	idImage NOT NULL,
+	idCategory NOT NULL,
+	idBrand NOT NULL,
+	price NUMERIC NOT NULL CHECK(price > ),
+	stock INTEGER NOT NULL CHECK(stock >= ),
+	weigth NUMERIC NOT NULL CHECK(weight > ),
+	width NUMERIC NOT NULL CHECK(width > ),
+	height NUMERIC NOT NULL CHECK(height > ),
+	description text NOT NULL,
+	CONSTRAINT fk_Category FOREIGN KEY(idCategory) REFERENCES Category(idCategory),
+	CONSTRAINT fk_Image FOREIGN KEY(idImage) REFERENCES Image(idImage),
+	CONSTRAINT fk_Brand FOREIGN KEY(idBrand) REFERENCES Brand(idBrand),
+ 
+	PRIMARY KEY(idProduct)
+);
+
+
+
+
+
+CREATE TABLE Review (
+	idUser INTEGER NOT NULL REFERENCES User(idUser),
+	idProduct INTEGER NOT NULL REFERENCES Product(idProduct),
+	Date DATE NOT NULL,
+	rating NUMERIC NOT NULL CHECK(rating >= AND rating <= 5),
+	description text,
+ 
+	CONSTRAINT pk_Review PRIMARY KEY(idUser,idProduct)
+);
+
+
+
+
+
+CREATE TABLE PurchaseProduct(
+	idProduct INTEGER NOT NULL REFERENCES Product(idProduct),
+	idCheckout INTEGER NOT NULL REFERENCES Checkout(idCheckout),
+	price NUMERIC NOT NULL CHECK(price > ),
+	quantity INTEGER CHECK(quantity > ),
+ 
+	CONSTRAINT pk_PurchaseProduct PRIMARY KEY(idProduct,idPurchase)
+);
+
+
+
+
+
+
+
+CREATE TABLE Purchase(
+	idPurchase SERIAL NOT NULL,
+	checkoutDate DATE NOT NULL,
+	idUser INTEGER NOT NULL,
+ 
+	CONSTRAINT fk_User FOREIGN(idUser) REFERENCES User(idUser),
+ 
+	PRIMARY KEY(idPurchase)
+);
+
+
+
+
+
+CREATE TABLE Category(
+	idCategory SERIAL NOT NULL,
+	name text NOT NULL,
+	promoPercentage INTEGER NOT NULL CHECK(promoPercentage >= AND promoPercentage <= 100),
+	startDate DATE,
+	endDate DATE,
+ 
+	PRIMARY KEY(idCategory)
+);
+
+
+
+
+
+
+
+CREATE TABLE Image(
+	idImage SERIAL NOT NULL,
+	name text NOT NULL,
+	url text NOT NULL,
+ 
+	PRIMARY KEY(idImage)
+);
+
+
+CREATE TABLE Brand(
+	idBrand SERIAL NOT NULL,
+	name text NOT NULL,
+	email text NOT NULL,
+ 
+	PRIMARY KEY(idBrand)
+);
+
+
+CREATE TABLE Address(
+	idAddress SERIAL NOT NULL,
+	city text NOT NULL,
+	country text NOT NULL,
+	doorNum text NOT NULL,
+	zipcode text NOT NULL,
+	street text NOT NULL,
+ 
+	PRIMARY KEY(idAddress)
+);
+
+
+CREATE TABLE BillingAddress(
+	idAddress INTEGER NOT NULL REFERENCES Address(idAddress),
+	nif text NOT NULL,
+	phone text NOT NULL,
+ 
+	CONSTRAINT pk_Address PRIMARY KEY(idAddress)
+);
+
+CREATE TABLE ShippingAddress(
+	idAddress INTEGER NOT NULL REFERENCES Address(idAddress),
+ 
+	CONSTRAINT pk_Address PRIMARY KEY(idAddress)
+);
