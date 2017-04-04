@@ -3,6 +3,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class RemoteApplication implements RemoteInterface{
@@ -65,10 +68,18 @@ public class RemoteApplication implements RemoteInterface{
 	}
 
 	@Override
-	public String DeleteProtocol()  {
-		// TODO Auto-generated method stub
-		return null;
+	public String DeleteProtocol(String filename, int Chunknr)  {
+		for(int i=1; i<=Chunknr; i++) {
+				try {
+					Files.delete(Paths.get("./"+filename+".part"+i));
+				} catch (IOException e) {
+					return "ERROR: Failed to delete one chunk of "+filename;
+				}
+
+		}
+		return "File "+filename+" chunks deleted with success.";
 	}
+	
 
 	@Override
 	public String ReclaimProtocol()  {
