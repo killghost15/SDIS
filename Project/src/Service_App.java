@@ -7,6 +7,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -41,7 +42,7 @@ public class Service_App {
 		DatagramSocket socket = new DatagramSocket();
 
 
-		byte[] buf = new byte[256];
+		byte[] buf;
 
 		DatagramPacket packetsend;
 		DatagramPacket packetreceive;
@@ -94,7 +95,7 @@ public class Service_App {
 					}
 
 
-					buf = new byte[256];
+					buf = new byte[readLength];
 
 					byteChunkPart = new byte[readLength];
 
@@ -105,13 +106,13 @@ public class Service_App {
 					assert (read == byteChunkPart.length);
 
 					nChunks++;
-
+					
 					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+CR+LF+" ";
 					
 					msgBody=new String(byteChunkPart);
 					msg=msgHeader+msgBody;
-					System.out.println(msg);
-					System.out.println("Buffer");
+					//System.out.println(msg);
+					//System.out.println("Buffer");
 					
 					buf=msg.getBytes();
 					System.out.println(buf);
@@ -123,7 +124,7 @@ public class Service_App {
 						
 						socket.setSoTimeout(5000);
 						try{
-							buf=new byte[256];
+							buf=new byte[readLength];
 						packetreceive = new DatagramPacket(buf, buf.length);
 						socket.receive(packetreceive);
 						answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
@@ -144,24 +145,31 @@ public class Service_App {
 					
 				}
 				inputStream.close();
-
+				
 			} catch (IOException exception) {
 
 				exception.printStackTrace();
 
 			}
 
-
+			
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
 			//fazer igual para os ifs todos 
 
-
+			
+			try {
+				registry.unbind("Teste2");
+			} catch (NotBoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			socket.close();
+			
 		}	
 
 		//BACKUP
-		if(args[1].equals("RESTORE") && args.length==4){
+		/*if(args[1].equals("RESTORE") && args.length==4){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
 			//Cria o objecto RMI para executar os subprotocols 
@@ -194,7 +202,7 @@ public class Service_App {
 			registry.bind("Service", stub);
 		}
 		//Space allocation management
-
+*/
 
 	}
 

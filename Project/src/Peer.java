@@ -27,11 +27,10 @@ public class Peer {
 		//host_name
         
         String []splittedHead;
-        String body=null;
-		byte[] buf = new byte[256];
-		int port;
+       
+		byte[] buf = new byte[64000];
 		InetAddress address = InetAddress.getByName(mac);
-		InetAddress sendaddress;
+		
 		DatagramPacket packetreceive = null;
 		DatagramPacket packetsend = null;
 		packetreceive = new DatagramPacket(buf, buf.length);
@@ -39,11 +38,12 @@ public class Peer {
 		socket.joinGroup(address);
 		String msghead=null;
 		String msgbody=null;
+		Registry registry;
 		//Treat the message received loop infinito para f
 //while(true){
 		socket.receive(packetreceive);
 		String request = new String(packetreceive.getData(), 0, packetreceive.getLength());
-		System.out.println(request);
+		
 		/*System.out.println(CR+LF);
 		byte b[]={0xD,0xA};
 		System.out.println(new String(b.toString()));
@@ -52,10 +52,9 @@ public class Peer {
 		//Regex this way you can put as much spaces as you want it will still divide it the same
 		 msghead=request.split(" +"+CR+LF+" +")[0];
 		 msgbody=request.split(" +"+CR+LF+" +")[1];
-		System.out.println(msghead);
-		System.out.println(msgbody);
+		 System.out.println(msghead);
 		
-		System.out.println(msgbody.getBytes());
+		
 		splittedHead=msghead.split(" +");
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 		if(splittedHead[0].equals("PUTCHUNK")){
@@ -66,14 +65,15 @@ public class Peer {
 				e.printStackTrace();
 			}
 			buf=new byte[256];
-			Registry registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
-	        RemoteInterface stub=(RemoteInterface)registry.lookup("Test2");
+			//System.out.println(LocateRegistry.getRegistry(packetreceive.getAddress().getCanonicalHostName()));
+			registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
+	        RemoteInterface stub=(RemoteInterface)registry.lookup("Teste2");
 	        //content será o body ainda n sei como o extrair
 	        stub.StoreBackupProtocol(splittedHead[3], Integer.parseInt(splittedHead[4]), msgbody.getBytes());
 	        System.out.println("Saved file");
-	        port=packetreceive.getPort();
-	        sendaddress=packetreceive.getAddress();
-	        packetsend=new DatagramPacket(buf, buf.length,sendaddress,port);
+	        buf="STORED".getBytes();
+	        
+	        packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
 			socket.send(packetsend);
 		}
 		socket.close();
