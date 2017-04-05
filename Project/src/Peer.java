@@ -3,9 +3,11 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.nio.charset.StandardCharsets;
+import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 
 public class Peer {
@@ -31,16 +33,33 @@ public class Peer {
 		byte[] buf = new byte[64000];
 		InetAddress address = InetAddress.getByName(mac);
 		
+		RemoteApplication app=new RemoteApplication();
+		RemoteInterface stub=null;
+		Registry registry=null;
+		
+		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
+		registry= LocateRegistry.getRegistry();
+		
 		DatagramPacket packetreceive = null;
 		DatagramPacket packetsend = null;
-		packetreceive = new DatagramPacket(buf, buf.length);
+		
 		//junta-se ao grupo com o mac
 		socket.joinGroup(address);
 		String msghead=null;
 		String msgbody=null;
-		Registry registry;
-		//Treat the message received loop infinito para f
-//while(true){
+		String answer=null;
+		try {
+			registry.bind("Teste2", stub);
+		} catch (AlreadyBoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		//Treat the message received loop infinito
+		//need a break condition that is usefull
+		
+		while(true){
+		buf = new byte[stub.getreadLength()];
+		packetreceive = new DatagramPacket(buf, buf.length);
 		socket.receive(packetreceive);
 		String request = new String(packetreceive.getData(), 0, packetreceive.getLength());
 		
@@ -58,32 +77,26 @@ public class Peer {
 		splittedHead=msghead.split(" +");
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 		if(splittedHead[0].equals("PUTCHUNK")){
-			 try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			 
 			buf=new byte[256];
-			//System.out.println(LocateRegistry.getRegistry(packetreceive.getAddress().getCanonicalHostName()));
-			registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
-	        RemoteInterface stub=(RemoteInterface)registry.lookup("Teste2");
-	        //content será o body ainda n sei como o extrair
-	        stub.StoreBackupProtocol(splittedHead[3], Integer.parseInt(splittedHead[4]), msgbody.getBytes());
+			
 	        System.out.println("Saved file");
-	        buf="STORED".getBytes();
+	        answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+" ";
+	        buf=answer.getBytes();
 	        
 	        packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
 			socket.send(packetsend);
+			
+			registry.rebind("Teste2", stub);
+			
+			
 		}
-		socket.close();
 		
 		
-		
-		//Use RMI application for subprotocol function
 		
 	}
-	//}
+		//socket.close();
+	}
 
 
 }

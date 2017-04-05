@@ -36,7 +36,7 @@ public class Service_App {
 			return;
 		}
 		//inicialização das variaveis 
-		RemoteApplication app=new RemoteApplication();
+		
 		RemoteInterface stub=null;
 		Registry registry=null;
 		DatagramSocket socket = new DatagramSocket();
@@ -53,8 +53,7 @@ public class Service_App {
 		InetAddress address=InetAddress.getByName(mac);
 		String msg=null;
 
-		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-		registry= LocateRegistry.getRegistry();
+		
 		
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
 			int repDegree=Integer.parseInt(args[3]);
@@ -78,7 +77,7 @@ public class Service_App {
 
 			int fileSize = (int) inputFile.length();
 
-			int nChunks = 0, read = 0, readLength=stub.getreadLength();
+			int nChunks = 0, read = 0, readLength=64*1000;
 
 			byte[] byteChunkPart;
 
@@ -88,7 +87,7 @@ public class Service_App {
 
 				while (fileSize > 0) {
 
-					if (fileSize <=stub.getreadLength() ) {
+					if (fileSize <=readLength ) {
 
 						readLength = fileSize;
 
@@ -107,7 +106,7 @@ public class Service_App {
 
 					nChunks++;
 					
-					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+CR+LF+" ";
+					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
 					
 					msgBody=new String(byteChunkPart);
 					msg=msgHeader+msgBody;
@@ -116,28 +115,48 @@ public class Service_App {
 					
 					buf=msg.getBytes();
 					System.out.println(buf);
+					//first message gets sent to multicastgroup
 					packetsend = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
 					socket.send(packetsend);
-					registry.bind("Teste2", stub);
-					//Espera pelas respostas dos peers 
+					
+					//waits for response of peers and the number of responses must be equal to repdegree or gets re-sent
+					//#TODO test with more peers and bigger repdegree than 1 so see if there is an issue around all peers answering at same time :o
 					while(answerCount<repDegree){
-						
+						//Timeout so it re-sends 
 						socket.setSoTimeout(5000);
 						try{
-							buf=new byte[readLength];
+						//cleans up buffer
+						buf=new byte[256];
 						packetreceive = new DatagramPacket(buf, buf.length);
+						//waits for reception or launches exception
 						socket.receive(packetreceive);
+						//when received shows the answer
 						answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
 						System.out.println(answer);
 						answerCount++;
+						try {
+							Thread.sleep(4000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						//on reception uses that packet's sender address to make the remote method of savin the chunk
+						registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
+				        stub=(RemoteInterface)registry.lookup("Teste2");
+				        //
+				        stub.StoreBackupProtocol(filename.toString(), nChunks, byteChunkPart);
+						
 						}
 						catch (SocketTimeoutException e) {
 							System.out.println("still missing "+(repDegree-answerCount)+" answers");
 							System.out.println("re-sending");
 							socket.send(packetsend);
 							
+						} catch (NotBoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						registry.rebind("Teste2", stub);
+						
 					}
 					
 					byteChunkPart = null;
@@ -158,12 +177,7 @@ public class Service_App {
 			//fazer igual para os ifs todos 
 
 			
-			try {
-				registry.unbind("Teste2");
-			} catch (NotBoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			socket.close();
 			
 		}	
