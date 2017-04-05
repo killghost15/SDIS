@@ -43,7 +43,8 @@ public class Service_App {
 
 		byte[] buf = new byte[256];
 
-		DatagramPacket packet;
+		DatagramPacket packetsend;
+		DatagramPacket packetreceive;
 
 		String msgHeader = null;
 		String msgBody=null;
@@ -105,38 +106,39 @@ public class Service_App {
 
 					nChunks++;
 
-					msgHeader="PUTCHANK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+CR+LF+" ";
+					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+CR+LF+" ";
 					
-					msgBody=byteChunkPart.toString();
+					msgBody=new String(byteChunkPart);
 					msg=msgHeader+msgBody;
 					System.out.println(msg);
 					System.out.println("Buffer");
 					
 					buf=msg.getBytes();
 					System.out.println(buf);
-					packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
-					socket.send(packet);
-				/*
+					packetsend = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
+					socket.send(packetsend);
+					registry.bind("Teste2", stub);
 					//Espera pelas respostas dos peers 
 					while(answerCount<repDegree){
 						
 						socket.setSoTimeout(5000);
 						try{
-						packet = new DatagramPacket(buf, buf.length);
-						socket.receive(packet);
-						registry.bind("SDIS", stub);
-						answer = new String(packet.getData(), 0, packet.getLength());
+							buf=new byte[256];
+						packetreceive = new DatagramPacket(buf, buf.length);
+						socket.receive(packetreceive);
+						answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
+						System.out.println(answer);
 						answerCount++;
 						}
 						catch (SocketTimeoutException e) {
 							System.out.println("still missing "+(repDegree-answerCount)+" answers");
 							System.out.println("re-sending");
-							socket.send(packet);
+							socket.send(packetsend);
 							
 						}
-
+						registry.rebind("Teste2", stub);
 					}
-					*/
+					
 					byteChunkPart = null;
 					answerCount=0;
 					

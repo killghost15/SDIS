@@ -26,19 +26,23 @@ public class Peer {
 		//socket.setTimeToLive(1);
 		//host_name
         
-        String header=null;
+        String []splittedHead;
         String body=null;
 		byte[] buf = new byte[256];
+		int port;
 		InetAddress address = InetAddress.getByName(mac);
-		DatagramPacket packet = null;
-		packet = new DatagramPacket(buf, buf.length);
+		InetAddress sendaddress;
+		DatagramPacket packetreceive = null;
+		DatagramPacket packetsend = null;
+		packetreceive = new DatagramPacket(buf, buf.length);
 		//junta-se ao grupo com o mac
 		socket.joinGroup(address);
-
-		//Treat the message received
-
-		socket.receive(packet);
-		String request = new String(packet.getData(), 0, packet.getLength());
+		String msghead=null;
+		String msgbody=null;
+		//Treat the message received loop infinito para f
+//while(true){
+		socket.receive(packetreceive);
+		String request = new String(packetreceive.getData(), 0, packetreceive.getLength());
 		System.out.println(request);
 		/*System.out.println(CR+LF);
 		byte b[]={0xD,0xA};
@@ -46,26 +50,40 @@ public class Peer {
 		System.out.println(new String(b).getBytes());
 		*/
 		//Regex this way you can put as much spaces as you want it will still divide it the same
-		String msghead=request.split(" +"+CR+LF+" +")[0];
-		String msgbody=request.split(" +"+CR+LF+" +")[1];
+		 msghead=request.split(" +"+CR+LF+" +")[0];
+		 msgbody=request.split(" +"+CR+LF+" +")[1];
 		System.out.println(msghead);
 		System.out.println(msgbody);
+		
 		System.out.println(msgbody.getBytes());
-		/*
+		splittedHead=msghead.split(" +");
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 		if(splittedHead[0].equals("PUTCHUNK")){
-			Registry registry = LocateRegistry.getRegistry(packet.getAddress().getHostName());
-	        RemoteInterface stub=(RemoteInterface)registry.lookup("SDIS");
+			 try {
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			buf=new byte[256];
+			Registry registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
+	        RemoteInterface stub=(RemoteInterface)registry.lookup("Test2");
 	        //content será o body ainda n sei como o extrair
 	        stub.StoreBackupProtocol(splittedHead[3], Integer.parseInt(splittedHead[4]), msgbody.getBytes());
-			
+	        System.out.println("Saved file");
+	        port=packetreceive.getPort();
+	        sendaddress=packetreceive.getAddress();
+	        packetsend=new DatagramPacket(buf, buf.length,sendaddress,port);
+			socket.send(packetsend);
 		}
+		socket.close();
 		
-		*/
+		
 		
 		//Use RMI application for subprotocol function
 		
 	}
+	//}
 
 
 }
