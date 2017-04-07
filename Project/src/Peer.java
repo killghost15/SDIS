@@ -8,7 +8,6 @@ import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.rmi.registry.*;
 
 
 public class Peer {
@@ -39,7 +38,7 @@ public class Peer {
 		Registry registry=null;
 		
 		stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-		registry= LocateRegistry.createRegistry(2000);
+		registry= LocateRegistry.getRegistry();
 		
 		DatagramPacket packetreceive = null;
 		DatagramPacket packetsend = null;
