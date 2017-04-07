@@ -12,12 +12,12 @@ public class RemoteApplication implements RemoteInterface{
 	String metadatafile=".metadata";
 	int readLength=64*1000;
 	public RemoteApplication(){
-		try {
+		/*try {
 			FileOutputStream file=new FileOutputStream(".metadata", true);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 	}
 	@Override
 	public String StoreBackupProtocol(String filename,int Chunknr,byte[]content)  {

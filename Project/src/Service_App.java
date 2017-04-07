@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -38,153 +39,14 @@ public class Service_App {
 		}
 		//inicialização das variaveis 
 		
-		RemoteInterface stub=null;
-		Registry registry=null;
-		DatagramSocket socket = new DatagramSocket();
-
-
-		byte[] buf;
-
-		DatagramPacket packetsend;
-		DatagramPacket packetreceive;
-
-		String msgHeader = null;
-		String msgBody=null;
-		String answer=null;
-		InetAddress address=InetAddress.getByName(mac);
-		String msg=null;
+		
+		InetAddress macaddress=InetAddress.getByName(mac);
+		
 
 		
 		
 		if(args[1].equals("BACKUP") /*&& args.length==4*/ ){
-			int repDegree=Integer.parseInt(args[3]);
-			MessageDigest md =MessageDigest.getInstance("SHA-256");
-			md.update(args[2].getBytes());
-			byte byteData[]=md.digest();
-			int answerCount=0;
-			//convert to hex
-			StringBuffer filename = new StringBuffer();
-			for (int i = 0; i < byteData.length; i++) {
-				filename.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-			}
-
-			//envio da mensagem para o grupo multicast
-			//filename=args[2]
-
-
-			File inputFile = new File(args[2]);
-
-			FileInputStream inputStream;
-
-			int fileSize = (int) inputFile.length();
-
-			int nChunks = 0, read = 0, readLength=64*1000, totalChunks=0;
-			byte[] byteChunkPart;
-			
-			totalChunks = fileSize/readLength;
-			if(fileSize%readLength != 0)
-				totalChunks++;;
-			writeMetadata(filename.toString(),totalChunks);
-
-			try {
-
-				inputStream = new FileInputStream(inputFile);
-
-				while (fileSize > 0) {
-
-					if (fileSize <=readLength ) {
-
-						readLength = fileSize;
-
-					}
-
-
-					buf = new byte[readLength];
-
-					byteChunkPart = new byte[readLength];
-
-					read = inputStream.read(byteChunkPart, 0, readLength);
-
-					fileSize -= read;
-
-					assert (read == byteChunkPart.length);
-
-					nChunks++;
-					
-					
-					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
-					
-					msgBody=new String(byteChunkPart);
-					msg=msgHeader+msgBody;
-					//System.out.println(msg);
-					//System.out.println("Buffer");
-					
-					buf=msg.getBytes();
-					System.out.println(buf);
-					//first message gets sent to multicastgroup
-					packetsend = new DatagramPacket(buf, buf.length, address, Integer.parseInt(args[0]));
-					socket.send(packetsend);
-					
-					//waits for response of peers and the number of responses must be equal to repdegree or gets re-sent
-					//#TODO test with more peers and bigger repdegree than 1 so see if there is an issue around all peers answering at same time :o
-					while(answerCount<repDegree){
-						//Timeout so it re-sends 
-						socket.setSoTimeout(5000);
-						try{
-						//cleans up buffer
-						buf=new byte[256];
-						packetreceive = new DatagramPacket(buf, buf.length);
-						//waits for reception or launches exception
-						socket.receive(packetreceive);
-						//when received shows the answer
-						answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
-						System.out.println(answer);
-						answerCount++;
-						try {
-							Thread.sleep(4000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						//on reception uses that packet's sender address to make the remote method of savin the chunk
-						registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
-				        stub=(RemoteInterface)registry.lookup("Teste2");
-				        //
-				        stub.StoreBackupProtocol(filename.toString(), nChunks, byteChunkPart);
-						
-						}
-						catch (SocketTimeoutException e) {
-							System.out.println("still missing "+(repDegree-answerCount)+" answers");
-							System.out.println("re-sending");
-							socket.send(packetsend);
-							
-						} catch (NotBoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}
-					
-					byteChunkPart = null;
-					answerCount=0;
-					
-				}
-				inputStream.close();
-				
-			} catch (IOException exception) {
-
-				exception.printStackTrace();
-
-			}
-
-			
-			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
-			//Cria o objecto RMI para executar os subprotocols 
-			//fazer igual para os ifs todos 
-
-			
-			
-			socket.close();
+			Backup(Integer.parseInt(args[3]),args[2],macaddress,Integer.parseInt(args[0]));
 			
 		}
 
@@ -227,12 +89,156 @@ public class Service_App {
 
 	}
 	
-	static void writeMetadata(String filename, int nChunks) throws IOException {
+	public static void writeMetadata(String filename, int nChunks) throws IOException {
 		FileOutputStream file=new FileOutputStream(metadatafile,true);
 		file.write((filename+" "+nChunks+"\n").getBytes());
 		file.flush();
 		file.close();
 	}
 
+	public static void Backup(int repDegree,String filename,InetAddress address,int port) throws NoSuchAlgorithmException, IOException{
+		
+		MessageDigest md =MessageDigest.getInstance("SHA-256");
+		md.update(filename.getBytes());
+		byte byteData[]=md.digest();
+		int answerCount=0;
+		//convert to hex
+		StringBuffer filenamebuf = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			filenamebuf.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+		}
+
+		//envio da mensagem para o grupo multicast
+		//filename=args[2]
+
+		RemoteInterface stub=null;
+		Registry registry=null;
+		DatagramSocket socket = new DatagramSocket();
+
+
+		byte[] buf;
+
+		DatagramPacket packetsend;
+		DatagramPacket packetreceive;
+
+		String msgHeader = null;
+		String msgBody=null;
+		String answer=null;
+		String msg=null;
+		File inputFile = new File(filename);
+
+		FileInputStream inputStream;
+
+		int fileSize = (int) inputFile.length();
+
+		int nChunks = 0, read = 0, readLength=64*1000, totalChunks=0;
+		byte[] byteChunkPart;
+		
+		totalChunks = fileSize/readLength;
+		if(fileSize%readLength != 0)
+			totalChunks++;;
+		writeMetadata(filenamebuf.toString(),totalChunks);
+
+		try {
+
+			inputStream = new FileInputStream(inputFile);
+
+			while (fileSize > 0) {
+
+				if (fileSize <=readLength ) {
+
+					readLength = fileSize;
+
+				}
+
+
+				buf = new byte[readLength];
+
+				byteChunkPart = new byte[readLength];
+
+				read = inputStream.read(byteChunkPart, 0, readLength);
+
+				fileSize -= read;
+
+				assert (read == byteChunkPart.length);
+
+				nChunks++;
+				
+				
+				msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
+				
+				msgBody=new String(byteChunkPart);
+				msg=msgHeader+msgBody;
+				//System.out.println(msg);
+				//System.out.println("Buffer");
+				
+				buf=msg.getBytes();
+				System.out.println(buf);
+				//first message gets sent to multicastgroup
+				packetsend = new DatagramPacket(buf, buf.length, address, port);
+				socket.send(packetsend);
+				
+				//waits for response of peers and the number of responses must be equal to repdegree or gets re-sent
+				//#TODO test with more peers and bigger repdegree than 1 so see if there is an issue around all peers answering at same time :o
+				while(answerCount<repDegree){
+					//Timeout so it re-sends 
+					socket.setSoTimeout(5000);
+					try{
+					//cleans up buffer
+					buf=new byte[256];
+					packetreceive = new DatagramPacket(buf, buf.length);
+					//waits for reception or launches exception
+					socket.receive(packetreceive);
+					//when received shows the answer
+					answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
+					System.out.println(answer);
+					answerCount++;
+					try {
+						Thread.sleep(4000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					//on reception uses that packet's sender address to make the remote method of savin the chunk
+					registry = LocateRegistry.getRegistry(packetreceive.getAddress().getHostName());
+			        stub=(RemoteInterface)registry.lookup("Teste2");
+			        //
+			        stub.StoreBackupProtocol(filenamebuf.toString(), nChunks, byteChunkPart);
+					
+					}
+					catch (SocketTimeoutException e) {
+						System.out.println("still missing "+(repDegree-answerCount)+" answers");
+						System.out.println("re-sending");
+						socket.send(packetsend);
+						
+					} catch (NotBoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+				
+				byteChunkPart = null;
+				answerCount=0;
+				
+			}
+			inputStream.close();
+			
+		} catch (IOException exception) {
+
+			exception.printStackTrace();
+
+		}
+
+		
+		//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
+		//Cria o objecto RMI para executar os subprotocols 
+		//fazer igual para os ifs todos 
+
+		
+		
+		socket.close();
+		
+	}
 
 }
