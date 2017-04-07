@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
@@ -26,16 +27,26 @@ public class Peer {
 
 	}
 	public static void main(String[] args) throws NumberFormatException, IOException, NotBoundException{
+		if(args.length<6){
+			System.out.println("usage like:");
+			System.out.println("java Peer <portmc><mcaddress><portmdb><mdbaddress><portmdr><mdraddress>");
+			
+			return;
+		}
 		//Estabilish connection with Mac group
-		MulticastSocket socket = new MulticastSocket(Integer.parseInt(args[0]));
+		MulticastSocket mc = new MulticastSocket(Integer.parseInt(args[0]));
+		InetAddress mcaddress = InetAddress.getByName(args[1]);
 		
-		//socket.setTimeToLive(1);
+		MulticastSocket mdb = new MulticastSocket(Integer.parseInt(args[2]));
+		InetAddress mdbaddress = InetAddress.getByName(args[3]);
+		MulticastSocket mdr = new MulticastSocket(Integer.parseInt(args[4]));
+		InetAddress mdraddress = InetAddress.getByName(args[5]);
+		
 		//host_name
-
 		String []splittedHead;
 
 		byte[] buf = new byte[64000];
-		InetAddress address = InetAddress.getByName(mac);
+		
 
 		RemoteApplication app=new RemoteApplication();
 		RemoteInterface stub=null;
@@ -48,10 +59,13 @@ public class Peer {
 		DatagramPacket packetsend = null;
 
 		//junta-se ao grupo com o mac
-		socket.joinGroup(address);
+		mc.joinGroup(mcaddress);
+		mdb.joinGroup(mdbaddress);
+		mdr.joinGroup(mdraddress);
 		String msghead=null;
 		String msgbody=null;
 		String answer=null;
+		byte[] doublebuf;
 		try {
 			registry.bind("Teste2", stub);
 		} catch (AlreadyBoundException e1) {
@@ -64,7 +78,37 @@ public class Peer {
 		while(true){
 			buf = new byte[stub.getreadLength()];
 			packetreceive = new DatagramPacket(buf, buf.length);
-			socket.receive(packetreceive);
+			
+			//State loop to check messages in each multicast chanel
+			while(true){
+				mc.setSoTimeout(1000);
+				mdb.setSoTimeout(1000);
+				mdr.setSoTimeout(1000);
+				try{
+					mc.receive(packetreceive);
+					break;
+					}catch(SocketTimeoutException e){
+						try{
+							
+							mdb.receive(packetreceive);
+							break;
+							
+							}catch(SocketTimeoutException e1){
+								
+								try{
+									
+									mdr.receive(packetreceive);
+									break;
+									}catch(SocketTimeoutException e2){
+										
+										
+									}
+							}
+					}
+				
+				
+			}
+				
 			String request = new String(packetreceive.getData(), 0, packetreceive.getLength());
 
 			/*System.out.println(CR+LF);
@@ -89,24 +133,27 @@ public class Peer {
 				buf=answer.getBytes();
 
 				packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
-				socket.send(packetsend);
+				mc.send(packetsend);
 
 				registry.rebind("Teste2", stub);
 
 
 			}
 			if(splittedHead[0].equals("GETCHUNK")){
-
+				
 				File folder = new File(System.getProperty("user.dir"));
 				for(int i=0;i<folder.listFiles().length;i++){
 
 					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])){
 						System.out.println(splittedHead[3]);
-
-						buf=ReadFile(folder.listFiles()[i].getName());
-
+						
+						doublebuf=ReadFile(folder.listFiles()[i].getName());
+						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR +LF+" ";
+						buf=new byte[msghead.getBytes().length+doublebuf.length];
+						System.arraycopy(msghead.getBytes(), 0, buf, 0, msghead.getBytes().length);
+						System.arraycopy(doublebuf, 0, buf, msghead.getBytes().length, doublebuf.length);
 						packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
-						socket.send(packetsend);
+						mdr.send(packetsend);
 					}
 				}
 
@@ -129,7 +176,7 @@ public class Peer {
 		
 		int fileSize = (int) inputFile.length();
 		byteChunkPart = new byte[fileSize];
-		int nChunks = 0, read = 0;
+		int read = 0;
 
 
 		try {
