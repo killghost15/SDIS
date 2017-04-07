@@ -29,10 +29,6 @@ public class RemoteApplication implements RemoteInterface{
 					filePart.write(content);
 					filePart.flush();
 					filePart.close();
-					FileOutputStream file=new FileOutputStream(metadatafile,true);
-					file.write(filename.getBytes());
-					file.flush();
-					file.close();
 					answer="Stored";
 				} catch (IOException exception) {
 

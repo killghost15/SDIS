@@ -23,6 +23,7 @@ public class Service_App {
 	private static byte[] CR ={'0','x','D'};
 	private static byte[] LF={'0','x','A'};
 	*/
+	private static String metadatafile=".metadata";
 	private static String CR="0xD";
 	private static String LF="0xA";
 	private static String mac="224.0.0.3";
@@ -106,6 +107,8 @@ public class Service_App {
 
 					nChunks++;
 					
+					writeMetadata(filename.toString(),nChunks);
+					
 					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
 					
 					msgBody=new String(byteChunkPart);
@@ -180,8 +183,8 @@ public class Service_App {
 			
 			socket.close();
 			
-		}	
-
+		}
+		
 		//BACKUP
 		/*if(args[1].equals("RESTORE") && args.length==4){
 			//envio da mensagem para o grupo multicast
@@ -218,6 +221,13 @@ public class Service_App {
 		//Space allocation management
 */
 
+	}
+	
+	static void writeMetadata(String filename, int nChunks) throws IOException {
+		FileOutputStream file=new FileOutputStream(metadatafile,true);
+		file.write((filename+" "+nChunks).getBytes());
+		file.flush();
+		file.close();
 	}
 
 
