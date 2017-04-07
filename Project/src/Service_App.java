@@ -78,9 +78,13 @@ public class Service_App {
 
 			int fileSize = (int) inputFile.length();
 
-			int nChunks = 0, read = 0, readLength=64*1000;
-
+			int nChunks = 0, read = 0, readLength=64*1000, totalChunks=0;
 			byte[] byteChunkPart;
+			
+			totalChunks = fileSize/readLength;
+			if(fileSize%readLength != 0)
+				totalChunks++;;
+			writeMetadata(filename.toString(),totalChunks);
 
 			try {
 
@@ -107,7 +111,6 @@ public class Service_App {
 
 					nChunks++;
 					
-					writeMetadata(filename.toString(),nChunks);
 					
 					msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filename.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
 					
@@ -184,6 +187,7 @@ public class Service_App {
 			socket.close();
 			
 		}
+
 		
 		//BACKUP
 		/*if(args[1].equals("RESTORE") && args.length==4){
@@ -225,7 +229,7 @@ public class Service_App {
 	
 	static void writeMetadata(String filename, int nChunks) throws IOException {
 		FileOutputStream file=new FileOutputStream(metadatafile,true);
-		file.write((filename+" "+nChunks).getBytes());
+		file.write((filename+" "+nChunks+"\n").getBytes());
 		file.flush();
 		file.close();
 	}
