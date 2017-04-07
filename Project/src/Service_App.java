@@ -15,6 +15,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 
 public class Service_App {
@@ -39,7 +40,7 @@ public class Service_App {
 		}
 		//inicialização das variaveis 
 		
-		
+		//#TODO make this an arg
 		InetAddress macaddress=InetAddress.getByName(mac);
 		
 
@@ -51,18 +52,12 @@ public class Service_App {
 		}
 
 		
-		//BACKUP
-		/*if(args[1].equals("RESTORE") && args.length==4){
-			//envio da mensagem para o grupo multicast
-			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
-			//Cria o objecto RMI para executar os subprotocols 
-			//fazer igual para os ifs todos 
-
-			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			registry= LocateRegistry.getRegistry();
-			registry.bind("Service", stub);
+		if(args[1].equals("RESTORE") ){
+			Restore(args[2],macaddress,Integer.parseInt(args[0]));
+					
 		}
 		//RESTORE 
+		/*
 		if(args[1].equals("DELETE")){
 			//envio da mensagem para o grupo multicast
 			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
@@ -89,6 +84,74 @@ public class Service_App {
 
 	}
 	
+	public static void Restore(String filename,InetAddress address,int port) throws NoSuchAlgorithmException, IOException {
+		DatagramPacket packetsend;
+		DatagramPacket packetreceive;
+
+		String msgHeader = null;
+		String msgBody=null;
+		String answer=null;
+		String msg=null;
+		DatagramSocket socket = new DatagramSocket();
+		int nTotalChunks = 0;
+		byte[] buf=new byte[256];
+
+		MessageDigest md =MessageDigest.getInstance("SHA-256");
+		md.update(filename.getBytes());
+		byte byteData[]=md.digest();
+		
+		//convert to hex
+		StringBuffer filenamebuf = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			filenamebuf.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		int nChunks=0,answercount=0;
+		
+		final Scanner s = new Scanner(new File(metadatafile));
+		while(s.hasNextLine()) {
+			
+		    final String line = s.nextLine();
+		
+		    if(line.split(" +")[0].equals(filenamebuf.toString())){
+		    	nTotalChunks=Integer.parseInt(line.split(" ")[1]);
+		    	}
+		}
+		s.close();
+		
+		
+		while(answercount<nTotalChunks){
+		
+			msgHeader="GETCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+(nChunks+1) +" "+CR+LF+" ";
+			buf=msgHeader.getBytes();
+			
+			packetsend = new DatagramPacket(buf, buf.length, address, port);
+			socket.send(packetsend);
+			break;
+			/*
+			socket.setSoTimeout(5000);
+			try{
+				buf=new byte[64*1000];
+				packetreceive = new DatagramPacket(buf, buf.length);
+				//waits for reception or launches exception
+				socket.receive(packetreceive);
+				//when received shows the answer
+				answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
+				System.out.println(answer);
+				answerCount++;
+				nChunks++;
+			}
+			catch (SocketTimeoutException e) {
+				System.out.println("still missing "+(nTotalChunks-answerCount)+" answers");
+				System.out.println("re-sending");
+				socket.send(packetsend);
+				
+			}
+			*/
+			
+		}
+	socket.close();
+	}
+
 	public static void writeMetadata(String filename, int nChunks) throws IOException {
 		FileOutputStream file=new FileOutputStream(metadatafile,true);
 		file.write((filename+" "+nChunks+"\n").getBytes());

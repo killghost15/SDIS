@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -70,14 +71,14 @@ public class Peer {
 		*/
 		//Regex this way you can put as much spaces as you want it will still divide it the same
 		 msghead=request.split(" +"+CR+LF+" +")[0];
-		 msgbody=request.split(" +"+CR+LF+" +")[1];
+		 
 		 System.out.println(msghead);
 		
 		
 		splittedHead=msghead.split(" +");
 		//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 		if(splittedHead[0].equals("PUTCHUNK")){
-			 
+			msgbody=request.split(" +"+CR+LF+" +")[1];
 			buf=new byte[256];
 			
 	        System.out.println("Saved file");
@@ -88,6 +89,13 @@ public class Peer {
 			socket.send(packetsend);
 			
 			registry.rebind("Teste2", stub);
+			
+			
+		}
+		if(splittedHead[0].equals("GETCHUNK")){
+			System.getProperty("user.dir");
+			System.out.println(System.getProperty("user.dir"));
+			//File folder = new File(System.getProperty("user.dir"));
 			
 			
 		}
