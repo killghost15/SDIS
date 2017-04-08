@@ -169,21 +169,21 @@ public class Peer {
 				List<String> l=new ArrayList<String>();
 				File folder = new File(System.getProperty("user.dir"));
 				for(int i=0;i<folder.listFiles().length;i++){
-					 
+
 					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])){
 						l.add(folder.listFiles()[i].getName());
-						
+
 					}
 				}
 				for(int j=0;j< l.size();j++){
-				try {
-					
-					Files.delete(FileSystems.getDefault().getPath(l.get(j)));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}}
+					try {
+
+						Files.delete(FileSystems.getDefault().getPath(l.get(j)));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}}
 
 
 
