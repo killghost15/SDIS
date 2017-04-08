@@ -16,13 +16,14 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class Peer {
 
-	private static String mac="224.0.0.3";
+	
 	/* #TODO aldrabei para string pk perdi a paciencia
 	private static byte[] CR ={'0','x','D'};
 	private static byte[] LF={'0','x','A'};
 	 */
-	private static String CR="0xD";
-	private static String LF="0xA";	public Peer(){
+	private static String CR="\r";
+	private static String LF="\n";
+	public Peer(){
 
 
 	}
@@ -148,7 +149,7 @@ public class Peer {
 						System.out.println(splittedHead[3]);
 						
 						doublebuf=ReadFile(folder.listFiles()[i].getName());
-						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR +LF+" ";
+						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR+LF+" ";
 						buf=new byte[msghead.getBytes().length+doublebuf.length];
 						System.arraycopy(msghead.getBytes(), 0, buf, 0, msghead.getBytes().length);
 						System.arraycopy(doublebuf, 0, buf, msghead.getBytes().length, doublebuf.length);
