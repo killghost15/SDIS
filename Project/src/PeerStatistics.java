@@ -1,17 +1,42 @@
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
-public class PeerStatistics {
+public class PeerStatistics implements Serializable {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<ChunkInformation> list;
 	private int maxCapacity;
+	private String peerId;
 	
 	public PeerStatistics() {
+		this.peerId = this.generateId();
 		this.list = new ArrayList<ChunkInformation >();
 		this.maxCapacity = 1000;
 	}
 	
+	private String generateId() {
+		char[] chars = "abcdefghijklmnopqrstuvwxyz123456789".toCharArray();
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < 10; i++) {
+		    char c = chars[random.nextInt(chars.length)];
+		    sb.append(c);
+		}
+		String output = sb.toString();
+		return output;
+	}
+	
 	public void addChunk(String chunkId, int kilobytes, int repdegree) {
 		this.list.add(new ChunkInformation(chunkId,kilobytes,repdegree));
+	}
+	
+	public String getPeerId() {
+		return this.peerId;
 	}
 	
 	public void getChunkId(int i) {
@@ -28,7 +53,12 @@ public class PeerStatistics {
 	
 	
 	//information for each chunk
-	public class ChunkInformation {
+	public class ChunkInformation implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
 		private String chunkId;
 		private int kilobytes;
 		private int repDegree;

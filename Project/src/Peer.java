@@ -3,11 +3,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.rmi.AlreadyBoundException;
@@ -29,11 +30,19 @@ public class Peer {
 	private static String CR="\r";
 	private static String LF="\n";
 	private static String peerfile="peer.statistics";
+	private static PeerStatistics statistics;
 	
-	public Peer(){
-
+	public Peer() throws ClassNotFoundException, IOException{
+		if(new File(peerfile).exists()) {
+			loadStatisticsFile();
+			System.out.println("Loaded peer file with id "+Peer.statistics.getPeerId());
+		}
+		else
+			Peer.statistics = new PeerStatistics();
+			
 
 	}
+	
 	public static void main(String[] args) throws NumberFormatException, IOException, NotBoundException{
 		if(args.length<6){
 			System.out.println("usage like:");
@@ -192,6 +201,7 @@ public class Peer {
 
 		}
 		//socket.close();
+		
 	}
 
 	public static byte[] ReadFile(String filename){
@@ -226,6 +236,26 @@ public class Peer {
 
 
 		return byteChunkPart;
+	}
+	
+	public void loadStatisticsFile() throws IOException, ClassNotFoundException {
+		FileInputStream file = new FileInputStream("peer.statistics");
+		ObjectInputStream restore = new ObjectInputStream(file);
+		
+		Peer.statistics = (PeerStatistics) restore.readObject();
+		
+		restore.close();
+		file.close();
+	}
+	
+	public static void saveStatistics() throws IOException {
+		FileOutputStream file = new FileOutputStream(peerfile);
+		ObjectOutputStream save = new ObjectOutputStream(file);
+		
+		save.writeObject(Peer.statistics);
+		
+		save.close();
+		file.close();
 	}
 	
 	void writePeerStatistics(String chunkId, int kilobytes, int repDegree) throws IOException {
