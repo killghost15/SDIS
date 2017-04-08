@@ -55,6 +55,13 @@ public class PeerStatistics implements Serializable {
 		this.list.get(i).getRepDegree();
 	}
 	
+	public void deleteChunks(String id) {
+		for(int i=0; i<this.list.size(); i++) {
+			if(this.list.get(i).getId().equals(id))
+				this.list.remove(i);
+		}
+	}
+	
 	
 	//information for each chunk
 	public class ChunkInformation implements Serializable {
