@@ -39,6 +39,10 @@ public class PeerStatistics implements Serializable {
 		return this.peerId;
 	}
 	
+	public int getMaxCapacity() {
+		return this.maxCapacity;
+	}
+	
 	public void getChunkId(int i) {
 		this.list.get(i).getId();
 	}
