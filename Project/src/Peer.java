@@ -23,10 +23,6 @@ import java.util.List;
 public class Peer {
 
 
-	/* #TODO aldrabei para string pk perdi a paciencia
-	private static byte[] CR ={'0','x','D'};
-	private static byte[] LF={'0','x','A'};
-	 */
 	private static String CR="\r";
 	private static String LF="\n";
 	private static String peerfile="peer.statistics";
