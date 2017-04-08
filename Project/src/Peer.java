@@ -76,7 +76,7 @@ public class Peer {
 
 		DatagramPacket packetreceive = null;
 		DatagramPacket packetsend = null;
-
+		int carry=0;
 		//junta-se ao grupo com o mac
 		mc.joinGroup(mcaddress);
 		mdb.joinGroup(mdbaddress);
@@ -151,7 +151,11 @@ public class Peer {
 				answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+CR+LF+" ";
 				buf=answer.getBytes();
 				//adding chunk information for peer statisticcs class
-				statistics.addChunk(splittedHead[3],msgbody.getBytes().length/1000, Integer.parseInt(splittedHead[5]));
+				if(msgbody.getBytes().length%1000>0)
+					carry=1;
+				else
+					carry=0;
+				statistics.addChunk(splittedHead[3],(msgbody.getBytes().length/1000)+carry, Integer.parseInt(splittedHead[5]));
 				packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
 				mc.send(packetsend);
 
@@ -260,14 +264,7 @@ public class Peer {
 		save.close();
 		file.close();
 	}
-	/*
-	public static void writePeerStatistics(String chunkId, int kilobytes, int repDegree) throws IOException {
-		FileOutputStream file=new FileOutputStream(peerfile,true);
-		file.write((chunkId+" "+kilobytes+" "+repDegree+"\n").getBytes());
-		file.flush();
-		file.close();
-
-	}*/
+	
 	public static PeerStatistics getPeerStatistics(){
 		return statistics;
 	}

@@ -34,7 +34,9 @@ public class PeerStatistics implements Serializable {
 	public void addChunk(String chunkId, int kilobytes, int repdegree) {
 		this.list.add(new ChunkInformation(chunkId,kilobytes,repdegree));
 	}
-	
+	public void changePeerCapacity(int storage){
+		maxCapacity=storage;
+	}
 	public String getPeerId() {
 		return this.peerId;
 	}

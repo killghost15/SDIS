@@ -44,6 +44,9 @@ public class Service_App {
 			 p=new Peer();
 		
 		//#TODO make this an arg
+		if(args[1].equals("CHANGE")){
+			p.getPeerStatistics().changePeerCapacity(Integer.parseInt(args[2]));
+		}
 		
 		if(args[1].equals("STATE")){
 			
