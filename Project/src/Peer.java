@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -27,6 +28,8 @@ public class Peer {
 	 */
 	private static String CR="\r";
 	private static String LF="\n";
+	private static String peerfile="peer.statistics";
+	
 	public Peer(){
 
 
@@ -223,6 +226,14 @@ public class Peer {
 
 
 		return byteChunkPart;
+	}
+	
+	void writePeerStatistics(String chunkId, int kilobytes, int repDegree) throws IOException {
+		FileOutputStream file=new FileOutputStream(peerfile,true);
+		file.write((chunkId+" "+kilobytes+" "+repDegree+"\n").getBytes());
+		file.flush();
+		file.close();
+
 	}
 
 }
