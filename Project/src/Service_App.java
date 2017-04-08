@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
@@ -21,10 +23,7 @@ import java.util.Scanner;
 public class Service_App {
 	//estou um bocado confuso com as mensagens n percebi se é assim e depois junto numa string ou se pode ser tudo String 
 	private static byte [] versionId={'1','.','0'};
-	/* #TODO aldrabei para string pk perdi a paciencia
-	private static byte[] CR ={'0','x','D'};
-	private static byte[] LF={'0','x','A'};
-	*/
+	
 	private static String metadatafile=".metadata";
 	private static String CR="\r";
 	private static String LF="\n";
@@ -41,10 +40,13 @@ public class Service_App {
 		
 		//#TODO make this an arg
 		
-		
+		if(args[2].equals("DELETE"))
+		{
+			Delete(args[3],Integer.parseInt(args[0]),InetAddress.getByName(args[1]));
+				}
 
 		
-		
+		if(args.length>4){
 		if(args[4].equals("BACKUP") /*&& args.length==4*/ ){
 			Backup(Integer.parseInt(args[6]),args[5],Integer.parseInt(args[0]),InetAddress.getByName(args[1]),Integer.parseInt(args[2]),InetAddress.getByName(args[3]));
 			
@@ -55,39 +57,74 @@ public class Service_App {
 			Restore(args[5],Integer.parseInt(args[0]),InetAddress.getByName(args[1]),Integer.parseInt(args[2]),InetAddress.getByName(args[3]));
 					
 		}
-		//RESTORE 
-		/*
-		if(args[1].equals("DELETE")){
-			//envio da mensagem para o grupo multicast
-			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
-			//Cria o objecto RMI para executar os subprotocols 
-			//fazer igual para os ifs todos 
-
-			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			registry= LocateRegistry.getRegistry();
-			registry.bind("Service", stub);
 		}
-		//DELETE
-		if(args[1].equals("STATE")){
-			//envio da mensagem para o grupo multicast
-			//tratar a recepcção da resposta, o backup por exemplo tem que receber o numero de respostas iguais ao replication degree
-			//Cria o objecto RMI para executar os subprotocols 
-			//fazer igual para os ifs todos 
-
-			stub=(RemoteInterface)UnicastRemoteObject.exportObject(app, 0);
-			registry= LocateRegistry.getRegistry();
-			registry.bind("Service", stub);
-		}
-		//Space allocation management
-*/
+		
+		
 
 	}
 	
+	public static void Delete(String filename,int mcport,InetAddress mcaddress) throws NoSuchAlgorithmException, IOException{
+		try {
+			Files.delete(FileSystems.getDefault().getPath(filename));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		DatagramPacket packetsend;
+		DatagramSocket socket = new DatagramSocket();
+		String msgHeader = null;
+		
+		MessageDigest md =MessageDigest.getInstance("SHA-256");
+		md.update(filename.getBytes());
+		byte byteData[]=md.digest();
+		
+		//convert to hex
+		StringBuffer filenamebuf = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			filenamebuf.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		
+		String newFile="";
+		final Scanner s = new Scanner(new File(metadatafile));
+		while(s.hasNextLine()) {
+			
+		    final String line = s.nextLine();
+		    
+		    if(line.split(" +")[0].equals(filenamebuf.toString())){
+		    	
+		    	}
+		    else{
+		    	if(s.hasNextLine())
+		    	newFile=newFile+line+"\n";
+		    	else{
+		    		newFile=newFile+line;
+		    	}
+				
+		    }
+		}
+		s.close();
+		FileOutputStream file=new FileOutputStream(metadatafile,false);
+		file.write((newFile).getBytes());
+		file.flush();
+		file.close();
+		
+		
+		
+		msgHeader="DELETE"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+CR+LF+CR+LF+" ";
+		byte[] buf=msgHeader.getBytes();
+		
+		
+		
+		packetsend = new DatagramPacket(buf, buf.length, mcaddress, mcport);
+		socket.send(packetsend);
+		
+		
+	}
 	public static void Restore(String filename,int mcport,InetAddress mcaddress,int mdrport,InetAddress mdraddress) throws NoSuchAlgorithmException, IOException {
 		DatagramPacket packetsend;
 		DatagramPacket packetreceive;
 		
-		byte [] FIleContent;
+		
 		String msgHeader = null;
 		String msgBody=null;
 		String answer=null;
@@ -172,8 +209,8 @@ public class Service_App {
 	socket.close();
 	}
 
-	public static void writeMetadata(String filename, int nChunks) throws IOException {
-		FileOutputStream file=new FileOutputStream(metadatafile,true);
+	public static void writeMetadata(String filename, int nChunks,boolean ovwr) throws IOException {
+		FileOutputStream file=new FileOutputStream(metadatafile,ovwr);
 		file.write((filename+" "+nChunks+"\n").getBytes());
 		file.flush();
 		file.close();
@@ -220,7 +257,7 @@ public class Service_App {
 		totalChunks = fileSize/readLength;
 		if(fileSize%readLength != 0)
 			totalChunks++;;
-		writeMetadata(filenamebuf.toString(),totalChunks);
+		writeMetadata(filenamebuf.toString(),totalChunks,true);
 
 		try {
 
