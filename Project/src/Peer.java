@@ -43,7 +43,7 @@ public class Peer {
 
 	}
 	
-	public static void main(String[] args) throws NumberFormatException, IOException, NotBoundException{
+	public static void main(String[] args) throws NumberFormatException, IOException, NotBoundException, ClassNotFoundException{
 		if(args.length<6){
 			System.out.println("usage like:");
 			System.out.println("java Peer <portmc><mcaddress><portmdb><mdbaddress><portmdr><mdraddress>");
@@ -58,7 +58,9 @@ public class Peer {
 		InetAddress mdbaddress = InetAddress.getByName(args[3]);
 		MulticastSocket mdr = new MulticastSocket(Integer.parseInt(args[4]));
 		InetAddress mdraddress = InetAddress.getByName(args[5]);
-
+		
+		Peer here=new Peer();
+		
 		//host_name
 		String []splittedHead;
 
@@ -148,7 +150,8 @@ public class Peer {
 				System.out.println("Saved file");
 				answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+CR+LF+" ";
 				buf=answer.getBytes();
-
+				//adding chunk information for peer statisticcs class
+				statistics.addChunk(splittedHead[3],msgbody.getBytes().length/1000, Integer.parseInt(splittedHead[5]));
 				packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
 				mc.send(packetsend);
 
@@ -198,7 +201,7 @@ public class Peer {
 				}}
 
 
-
+			saveStatistics();
 		}
 		//socket.close();
 		
@@ -249,7 +252,7 @@ public class Peer {
 	}
 	
 	public static void saveStatistics() throws IOException {
-		FileOutputStream file = new FileOutputStream(peerfile);
+		FileOutputStream file = new FileOutputStream(peerfile,false);
 		ObjectOutputStream save = new ObjectOutputStream(file);
 		
 		save.writeObject(Peer.statistics);
@@ -257,13 +260,16 @@ public class Peer {
 		save.close();
 		file.close();
 	}
-	
-	void writePeerStatistics(String chunkId, int kilobytes, int repDegree) throws IOException {
+	/*
+	public static void writePeerStatistics(String chunkId, int kilobytes, int repDegree) throws IOException {
 		FileOutputStream file=new FileOutputStream(peerfile,true);
 		file.write((chunkId+" "+kilobytes+" "+repDegree+"\n").getBytes());
 		file.flush();
 		file.close();
 
+	}*/
+	public static PeerStatistics getPeerStatistics(){
+		return statistics;
 	}
 
 }

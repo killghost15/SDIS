@@ -38,21 +38,25 @@ public class PeerStatistics implements Serializable {
 	public String getPeerId() {
 		return this.peerId;
 	}
-	
+	public int getNrofChunks(){
+		return list.size();
+	}
 	public int getMaxCapacity() {
 		return this.maxCapacity;
 	}
-	
-	public void getChunkId(int i) {
-		this.list.get(i).getId();
+	public ChunkInformation getChunkinfo(int i){
+		return list.get(i);
+	}
+	public String getChunkId(int i) {
+		return this.list.get(i).getId();
 	}
 	
-	public void getKilobytes(int i) {
-		this.list.get(i).getKilobytes();
+	public int getKilobytes(int i) {
+		return this.list.get(i).getKilobytes();
 	}
 	
-	public void getRepDegree(int i) {
-		this.list.get(i).getRepDegree();
+	public int getRepDegree(int i) {
+		return this.list.get(i).getRepDegree();
 	}
 	
 	public void deleteChunks(String id) {
