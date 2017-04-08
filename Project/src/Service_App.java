@@ -122,7 +122,7 @@ public class Service_App {
 		
 		while(answercount<nTotalChunks){
 		
-			msgHeader="GETCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+(nChunks+1) +" "+CR+LF+" ";
+			msgHeader="GETCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+(nChunks+1) +" "+CR+LF+CR+LF+" ";
 			buf=msgHeader.getBytes();
 			
 			packetsend = new DatagramPacket(buf, buf.length, mcaddress, mcport);
@@ -131,16 +131,17 @@ public class Service_App {
 			socket.setSoTimeout(5000);
 			try{
 				
-				buf=new byte[64*1000+msgHeader.getBytes().length];
+				buf=new byte[64*10000+msgHeader.getBytes().length];
 				packetreceive = new DatagramPacket(buf, buf.length);
 				//waits for reception or launches exception
 				socket.receive(packetreceive);
 				//when received shows the answer
 				answer = new String(packetreceive.getData(), 0, packetreceive.getLength());
-				//System.out.println(answer);
+				//System.out.println(answer.split(" +"+CR+LF+" +")[1]);
+				
 				
 				//System.arraycopy(answer.split(" +"+CR+LF+" +")[1].getBytes(), content.length, content, 0, answer.split(" +"+CR+LF+" +")[1].getBytes().length);
-				content=content+answer.split(" +"+CR+LF+" +")[1];
+				content=content+answer.split(" +"+CR+LF+CR+LF+" +")[1];
 				answercount++;
 				nChunks++;
 			}
@@ -242,7 +243,7 @@ public class Service_App {
 
 				nChunks++;
 				
-				msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+" ";
+				msgHeader="PUTCHUNK"+" "+versionId+" "+senderId+" "+ filenamebuf.toString()+" "+nChunks +" "+repDegree +" "+CR+LF+CR+LF+" ";
 				
 				msgBody=new String(byteChunkPart);
 				msg=msgHeader+msgBody;

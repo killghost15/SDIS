@@ -118,7 +118,7 @@ public class Peer {
 		System.out.println(new String(b).getBytes());
 			 */
 			//Regex this way you can put as much spaces as you want it will still divide it the same
-			msghead=request.split(" +"+CR+LF+" +")[0];
+			msghead=request.split(" +"+CR+LF+CR+LF+" +")[0];
 
 			System.out.println(msghead);
 
@@ -126,11 +126,11 @@ public class Peer {
 			splittedHead=msghead.split(" +");
 			//need to convert the "PUTCHUNK" Bytes to String or find away to split the bytes data
 			if(splittedHead[0].equals("PUTCHUNK")){
-				msgbody=request.split(" +"+CR+LF+" +")[1];
+				msgbody=request.split(" +"+CR+LF+CR+LF+" +")[1];
 				buf=new byte[256];
 
 				System.out.println("Saved file");
-				answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+" ";
+				answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+CR+LF+" ";
 				buf=answer.getBytes();
 
 				packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
@@ -149,7 +149,7 @@ public class Peer {
 						System.out.println(splittedHead[3]);
 						
 						doublebuf=ReadFile(folder.listFiles()[i].getName());
-						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR+LF+" ";
+						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR+LF+CR+LF+" ";
 						buf=new byte[msghead.getBytes().length+doublebuf.length];
 						System.arraycopy(msghead.getBytes(), 0, buf, 0, msghead.getBytes().length);
 						System.arraycopy(doublebuf, 0, buf, msghead.getBytes().length, doublebuf.length);
