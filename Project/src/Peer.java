@@ -56,7 +56,7 @@ public class Peer {
 		InetAddress mdraddress = InetAddress.getByName(args[5]);
 		
 		Peer here=new Peer();
-		
+		File folder;
 		//host_name
 		String []splittedHead;
 
@@ -144,14 +144,14 @@ public class Peer {
 				buf=new byte[256];
 
 				System.out.println("Saved file");
-				answer="STORED "+" "+splittedHead[1]+" "+splittedHead[2]+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+CR+LF+" ";
+				answer="STORED"+" "+splittedHead[1]+" "+statistics.getPeerId()+" " +splittedHead[3]+" " + splittedHead[4]+" " +CR+LF+CR+LF+" ";
 				buf=answer.getBytes();
 				//adding chunk information for peer statisticcs class
 				if(msgbody.getBytes().length%1000>0)
 					carry=1;
 				else
 					carry=0;
-				statistics.addChunk(splittedHead[3],(msgbody.getBytes().length/1000)+carry, Integer.parseInt(splittedHead[5]));
+				statistics.addChunk(splittedHead[3],(msgbody.getBytes().length/1000)+carry, Integer.parseInt(splittedHead[5]),Integer.parseInt(splittedHead[4]));
 				packetsend=new DatagramPacket(buf, buf.length,packetreceive.getAddress(),packetreceive.getPort());
 				mc.send(packetsend);
 
@@ -159,16 +159,29 @@ public class Peer {
 
 
 			}
-			if(splittedHead[0].equals("GETCHUNK")){
-
-				File folder = new File(System.getProperty("user.dir"));
+			if(splittedHead[0].equals("CHECK")){
+				folder = new File(System.getProperty("user.dir"));
 				for(int i=0;i<folder.listFiles().length;i++){
 
-					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])){
+					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])&&folder.listFiles()[i].getName().split(".part")[1].equals(splittedHead[4])){
+						answer="EXISTS"+" "+splittedHead[1]+" "+statistics.getPeerId()+" " +splittedHead[3]+" "+splittedHead[4]+" " +CR+LF+CR+LF+" ";
+					}
+
+				
+				}
+		
+			}
+			
+			if(splittedHead[0].equals("GETCHUNK")){
+
+				folder = new File(System.getProperty("user.dir"));
+				for(int i=0;i<folder.listFiles().length;i++){
+
+					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])&&folder.listFiles()[i].getName().split(".part")[1].equals(splittedHead[4])){
 						System.out.println(splittedHead[3]);
 
 						doublebuf=ReadFile(folder.listFiles()[i].getName());
-						msghead="CHUNK "+ splittedHead[1]+" "+splittedHead[2]+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR+LF+CR+LF+" ";
+						msghead="CHUNK "+ splittedHead[1]+" "+statistics.getPeerId()+" "+splittedHead[3]+" "+folder.listFiles()[i].getName().split(".part")[1]+" "+CR+LF+CR+LF+" ";
 						buf=new byte[msghead.getBytes().length+doublebuf.length];
 						System.arraycopy(msghead.getBytes(), 0, buf, 0, msghead.getBytes().length);
 						System.arraycopy(doublebuf, 0, buf, msghead.getBytes().length, doublebuf.length);
@@ -182,7 +195,7 @@ public class Peer {
 			}
 			if(splittedHead[0].equals("DELETE")){
 				List<String> l=new ArrayList<String>();
-				File folder = new File(System.getProperty("user.dir"));
+				folder = new File(System.getProperty("user.dir"));
 				for(int i=0;i<folder.listFiles().length;i++){
 
 					if(folder.listFiles()[i].getName().split(".part")[0].equals(splittedHead[3])){

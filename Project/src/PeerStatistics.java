@@ -31,8 +31,8 @@ public class PeerStatistics implements Serializable {
 		return output;
 	}
 	
-	public void addChunk(String chunkId, int kilobytes, int repdegree) {
-		this.list.add(new ChunkInformation(chunkId,kilobytes,repdegree));
+	public void addChunk(String chunkId, int kilobytes, int repdegree,int chunknr) {
+		this.list.add(new ChunkInformation(chunkId,kilobytes,repdegree,chunknr));
 	}
 	public void changePeerCapacity(int storage){
 		maxCapacity=storage;
@@ -79,17 +79,18 @@ public class PeerStatistics implements Serializable {
 		private String chunkId;
 		private int kilobytes;
 		private int repDegree;
-		
+		private int chunknr;
 		public ChunkInformation () {
 			this.chunkId = new String();
 			this.kilobytes = 0;
 			this.repDegree = 0;
 		}
 		
-		public ChunkInformation(String chunkId,int kilobytes,int repDegree) {
+		public ChunkInformation(String chunkId,int kilobytes,int repDegree,int chunknr) {
 			this.chunkId = chunkId;
 			this.kilobytes = kilobytes;
 			this.repDegree = repDegree;
+			this.chunknr=chunknr;
 		}
 		
 		public String getId() {
@@ -102,6 +103,9 @@ public class PeerStatistics implements Serializable {
 		
 		public int getRepDegree() {
 			return this.repDegree;
+		}
+		public int getChunknr(){
+			return this.chunknr;
 		}
 	}
 
